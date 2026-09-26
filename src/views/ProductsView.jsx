@@ -11,7 +11,10 @@ import {
   Boxes,
   PlusCircle,
   Eye,
-  X
+  X,
+  Edit2,
+  Trash2,
+  Save
 } from 'lucide-react';
 
 export default function ProductsView({
@@ -21,6 +24,9 @@ export default function ProductsView({
 }) {
   const {
     products,
+    user,
+    updateProduct,
+    deleteProduct,
     triggerToast
   } = useInventory();
 
@@ -29,6 +35,12 @@ export default function ProductsView({
   const [warehouseFilter, setWarehouseFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [inspectProduct, setInspectProduct] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editCost, setEditCost] = useState(0);
+  const [editPrice, setEditPrice] = useState(0);
+  const [editMinStock, setEditMinStock] = useState(0);
+  const [editSupplier, setEditSupplier] = useState('');
 
   // Helper for dynamic stock level visual
   const getStockBadge = (totalStock, minStock) => {
@@ -77,6 +89,45 @@ export default function ProductsView({
   const handleExport = () => {
     exportToCSV(products, 'StockSense_Product_Catalog');
     triggerToast('Product catalog exported as CSV!');
+  };
+
+  const handleOpenInspect = (p) => {
+    setInspectProduct(p);
+    setIsEditing(false);
+    setEditName(p.name);
+    setEditCost(p.costPrice);
+    setEditPrice(p.sellingPrice);
+    setEditMinStock(p.minStock);
+    setEditSupplier(p.supplier || '');
+  };
+
+  const handleSaveProductEdit = () => {
+    if (!inspectProduct) return;
+    updateProduct(inspectProduct.sku, {
+      name: editName.trim() || inspectProduct.name,
+      costPrice: Number(editCost),
+      sellingPrice: Number(editPrice),
+      minStock: Number(editMinStock),
+      supplier: editSupplier.trim() || inspectProduct.supplier
+    });
+
+    setInspectProduct({
+      ...inspectProduct,
+      name: editName.trim() || inspectProduct.name,
+      costPrice: Number(editCost),
+      sellingPrice: Number(editPrice),
+      minStock: Number(editMinStock),
+      supplier: editSupplier.trim() || inspectProduct.supplier
+    });
+    setIsEditing(false);
+  };
+
+  const handleDeleteProduct = () => {
+    if (!inspectProduct) return;
+    if (window.confirm(`Are you sure you want to delete SKU [${inspectProduct.sku}] "${inspectProduct.name}" from the inventory register?`)) {
+      deleteProduct(inspectProduct.sku);
+      setInspectProduct(null);
+    }
   };
 
   return (
@@ -295,9 +346,9 @@ export default function ProductsView({
                           </button>
 
                           <button
-                            onClick={() => setInspectProduct(p)}
+                            onClick={() => handleOpenInspect(p)}
                             className="p-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-secondary hover:text-on-surface transition-colors border border-surface-container"
-                            title="Inspect Details"
+                            title="Inspect & Edit Details"
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
@@ -312,10 +363,11 @@ export default function ProductsView({
         </div>
       </div>
 
-      {/* 4. Product Details Modal (Inspect) */}
+      {/* 4. Product Details & Edit Modal */}
       {inspectProduct && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-surface-container-lowest rounded-2xl max-w-lg w-full p-6 border border-surface-container shadow-2xl flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-primary-container/30 text-primary flex items-center justify-center font-bold">
@@ -323,7 +375,16 @@ export default function ProductsView({
                 </div>
                 <div className="flex flex-col">
                   <span className="font-mono text-xs font-bold text-primary-light">{inspectProduct.sku}</span>
-                  <h3 className="font-headline text-lg font-bold text-on-surface">{inspectProduct.name}</h3>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="font-headline text-base font-bold text-on-surface bg-surface-container-low px-2 py-0.5 rounded border border-surface-container outline-none focus:ring-1 focus:ring-primary"
+                    />
+                  ) : (
+                    <h3 className="font-headline text-lg font-bold text-on-surface">{inspectProduct.name}</h3>
+                  )}
                 </div>
               </div>
               <button
@@ -334,40 +395,89 @@ export default function ProductsView({
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container">
-                <span className="text-[10px] text-secondary uppercase font-bold">Category</span>
-                <p className="text-sm font-semibold text-on-surface mt-0.5">{inspectProduct.category}</p>
-              </div>
+            {/* Modal Body: View vs Edit Mode */}
+            {isEditing ? (
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className="text-[10px] text-secondary uppercase font-bold block mb-1">Cost Price (₹)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editCost}
+                    onChange={(e) => setEditCost(e.target.value)}
+                    className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface font-mono font-bold border border-surface-container outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
 
-              <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container">
-                <span className="text-[10px] text-secondary uppercase font-bold">Total Stock</span>
-                <p className="text-sm font-semibold text-on-surface mt-0.5">{inspectProduct.totalStock} {inspectProduct.uom}</p>
-              </div>
+                <div>
+                  <label className="text-[10px] text-secondary uppercase font-bold block mb-1">Selling Price (₹)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editPrice}
+                    onChange={(e) => setEditPrice(e.target.value)}
+                    className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-tertiary font-mono font-bold border border-surface-container outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
 
-              <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container">
-                <span className="text-[10px] text-secondary uppercase font-bold">Cost Price</span>
-                <p className="text-sm font-semibold text-on-surface mt-0.5">₹{inspectProduct.costPrice}</p>
-              </div>
+                <div>
+                  <label className="text-[10px] text-secondary uppercase font-bold block mb-1">Min Safety Stock ({inspectProduct.uom})</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editMinStock}
+                    onChange={(e) => setEditMinStock(e.target.value)}
+                    className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface font-mono font-bold border border-surface-container outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
 
-              <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container">
-                <span className="text-[10px] text-secondary uppercase font-bold">Selling Price</span>
-                <p className="text-sm font-semibold text-tertiary mt-0.5">₹{inspectProduct.sellingPrice}</p>
+                <div>
+                  <label className="text-[10px] text-secondary uppercase font-bold block mb-1">Supplier / Vendor</label>
+                  <input
+                    type="text"
+                    value={editSupplier}
+                    onChange={(e) => setEditSupplier(e.target.value)}
+                    className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
               </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container">
+                  <span className="text-[10px] text-secondary uppercase font-bold">Category</span>
+                  <p className="text-sm font-semibold text-on-surface mt-0.5">{inspectProduct.category}</p>
+                </div>
 
-              <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container">
-                <span className="text-[10px] text-secondary uppercase font-bold">Supplier</span>
-                <p className="text-sm font-semibold text-on-surface mt-0.5">{inspectProduct.supplier || 'Tata Steel Ltd.'}</p>
+                <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container">
+                  <span className="text-[10px] text-secondary uppercase font-bold">Total Stock</span>
+                  <p className="text-sm font-semibold text-on-surface mt-0.5">{inspectProduct.totalStock} {inspectProduct.uom}</p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container">
+                  <span className="text-[10px] text-secondary uppercase font-bold">Cost Price</span>
+                  <p className="text-sm font-semibold text-on-surface mt-0.5 font-mono">₹{inspectProduct.costPrice}</p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container">
+                  <span className="text-[10px] text-secondary uppercase font-bold">Selling Price</span>
+                  <p className="text-sm font-semibold text-tertiary mt-0.5 font-mono">₹{inspectProduct.sellingPrice}</p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container">
+                  <span className="text-[10px] text-secondary uppercase font-bold">Supplier</span>
+                  <p className="text-sm font-semibold text-on-surface mt-0.5">{inspectProduct.supplier || 'Tata Steel Ltd.'}</p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container">
+                  <span className="text-[10px] text-secondary uppercase font-bold">Barcode</span>
+                  <p className="text-sm font-mono font-semibold text-on-surface mt-0.5">{inspectProduct.barcode}</p>
+                </div>
               </div>
+            )}
 
-              <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container">
-                <span className="text-[10px] text-secondary uppercase font-bold">Barcode</span>
-                <p className="text-sm font-mono font-semibold text-on-surface mt-0.5">{inspectProduct.barcode}</p>
-              </div>
-            </div>
-
+            {/* Multi-Location Allocation Info */}
             <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container flex flex-col gap-1.5">
-              <span className="text-[10px] text-secondary uppercase font-bold">Location Breakdown</span>
+              <span className="text-[10px] text-secondary uppercase font-bold">Physical Storage Split</span>
               <div className="flex items-center justify-between text-xs font-mono">
                 <span>WH1 Central Store:</span>
                 <strong className="text-on-surface">{inspectProduct.locations?.['wh1-store'] || 0} {inspectProduct.uom}</strong>
@@ -378,22 +488,68 @@ export default function ProductsView({
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                onClick={() => {
-                  setInspectProduct(null);
-                  onOpenQuickRestockModal?.(inspectProduct.sku);
-                }}
-                className="px-4 py-2 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold hover:bg-emerald-500/30 transition-colors"
-              >
-                + Receive Stock
-              </button>
-              <button
-                onClick={() => setInspectProduct(null)}
-                className="px-4 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface transition-colors"
-              >
-                Close
-              </button>
+            {/* Modal Bottom Actions */}
+            <div className="flex items-center justify-between pt-2 border-t border-surface-container">
+              <div>
+                {user.role === 'manager' && !isEditing && (
+                  <button
+                    onClick={handleDeleteProduct}
+                    className="p-2 rounded-lg text-error hover:bg-error-container/20 transition-colors"
+                    title="Delete Product SKU"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className="px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSaveProductEdit}
+                      className="px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-hover transition-colors shadow-purple-glow flex items-center gap-1.5"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Save Changes</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {user.role === 'manager' && (
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface transition-colors flex items-center gap-1.5 border border-surface-container"
+                      >
+                        <Edit2 className="w-3.5 h-3.5 text-primary-light" />
+                        <span>Edit</span>
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        setInspectProduct(null);
+                        onOpenQuickRestockModal?.(inspectProduct.sku);
+                      }}
+                      className="px-4 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold hover:bg-emerald-500/30 transition-colors"
+                    >
+                      + Receive Stock
+                    </button>
+
+                    <button
+                      onClick={() => setInspectProduct(null)}
+                      className="px-3.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface transition-colors"
+                    >
+                      Close
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
