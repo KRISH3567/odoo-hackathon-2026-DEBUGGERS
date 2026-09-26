@@ -27,7 +27,8 @@ export default function BarcodeView() {
   } = useInventory();
 
   const [inputVal, setInputVal] = useState('');
-  const [activeScannedItem, setActiveScannedItem] = useState(products[0] || null);
+  const [scannedSku, setScannedSku] = useState(products[0]?.sku || 'RAW-STL-001');
+  const activeScannedItem = products.find(p => p.sku === scannedSku) || products[0] || null;
   const [activeQueueTab, setActiveQueueTab] = useState('pick'); // 'pick' | 'receive' | 'history'
   const [quickQty, setQuickQty] = useState(10);
   const [scanHistory, setScanHistory] = useState([
@@ -48,7 +49,7 @@ export default function BarcodeView() {
     // Check if matching SKU or Barcode
     const matchedProd = products.find(p => p.sku === code || p.barcode === code);
     if (matchedProd) {
-      setActiveScannedItem(matchedProd);
+      setScannedSku(matchedProd.sku);
       const log = {
         id: Date.now(),
         action: 'Scanned Product',

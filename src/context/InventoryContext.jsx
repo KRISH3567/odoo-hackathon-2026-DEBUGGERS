@@ -541,6 +541,20 @@ export function InventoryProvider({ children }) {
 
   // Product Management CRUD
   const createProduct = (prodData) => {
+    const cleanSku = prodData.sku ? prodData.sku.toUpperCase().trim() : '';
+    if (!cleanSku) {
+      triggerToast('SKU code is required', 'error');
+      soundFX.playWarningBuzz();
+      return null;
+    }
+
+    const existing = products.find(p => p.sku === cleanSku);
+    if (existing) {
+      triggerToast(`SKU [${cleanSku}] already exists in catalog! Please use a unique SKU.`, 'error');
+      soundFX.playWarningBuzz();
+      return null;
+    }
+
     const locKey = prodData.targetLocationKey || 'wh1-store';
     const initStock = Math.max(0, Number(prodData.initialStock || 0));
     const targetLocName = prodData.targetLocationName || (
@@ -553,7 +567,7 @@ export function InventoryProvider({ children }) {
 
     const newProd = {
       id: `prod-${Date.now()}`,
-      sku: prodData.sku.toUpperCase().trim(),
+      sku: cleanSku,
       name: prodData.name.trim(),
       category: prodData.category || 'Raw Materials',
       uom: prodData.uom || 'units',
@@ -620,7 +634,13 @@ export function InventoryProvider({ children }) {
   };
 
   const deleteProduct = (sku) => {
-    setProducts(prev => prev.filter(p => p.sku !== sku));
+    setProducts(prev => {
+      const remaining = prev.filter(p => p.sku !== sku);
+      if (selectedProductSku === sku) {
+        setSelectedProductSku(remaining[0]?.sku || '');
+      }
+      return remaining;
+    });
     triggerToast(`Product [${sku}] deleted from catalog`, 'error');
   };
 
