@@ -11,8 +11,6 @@ import {
   Zap,
   Warehouse,
   AlertTriangle,
-  Package,
-  Layers,
   CheckCircle2
 } from 'lucide-react';
 
@@ -27,7 +25,6 @@ export default function DashboardView({
 }) {
   const {
     products,
-    generateDraftPO,
     setCurrentView
   } = useInventory();
 
