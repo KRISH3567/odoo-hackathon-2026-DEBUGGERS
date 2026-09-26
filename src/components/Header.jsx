@@ -14,13 +14,15 @@ import {
   Sparkles,
   KeyRound,
   Menu,
-  X
+  X,
+  Mic
 } from 'lucide-react';
 
 export default function Header({
   onOpenScanModal,
   onOpenNewProductModal,
   onOpenAuthModal,
+  onOpenVoiceModal,
   mobileSidebarOpen,
   setMobileSidebarOpen
 }) {
@@ -128,6 +130,17 @@ export default function Header({
         >
           <ScanLine className="w-4 h-4 text-tertiary" />
           <span className="hidden sm:inline">Scan</span>
+        </button>
+
+        {/* Hands-Free Voice Button */}
+        <button
+          onClick={onOpenVoiceModal}
+          className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-all border border-surface-container shadow-2xs active:scale-95 group"
+          title="Hands-Free Floor Voice Assistant (Press 'V')"
+        >
+          <Mic className="w-4 h-4 text-primary-light group-hover:scale-110 transition-transform" />
+          <span className="hidden sm:inline">Voice</span>
+          <span className="font-mono text-[9px] px-1 py-0.2 rounded bg-surface-container-high text-secondary hidden xl:inline">V</span>
         </button>
 
         {/* New Product Button */}

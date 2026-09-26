@@ -14,13 +14,15 @@ import {
   X,
   Edit2,
   Trash2,
-  Save
+  Save,
+  Tag
 } from 'lucide-react';
 
 export default function ProductsView({
   onOpenNewProductModal,
   onOpenAdjustmentModal,
-  onOpenQuickRestockModal
+  onOpenQuickRestockModal,
+  onOpenLabelsModal
 }) {
   const {
     products,
@@ -149,6 +151,15 @@ export default function ProductsView({
         </div>
 
         <div className="flex items-center flex-wrap gap-2">
+          <button
+            onClick={() => onOpenLabelsModal?.('all')}
+            className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-all border border-surface-container shadow-2xs"
+            title="Generate printable barcode/QR shelf stickers"
+          >
+            <Tag className="w-4 h-4 text-primary-light" />
+            <span>Shelf Labels</span>
+          </button>
+
           <button
             onClick={handleExport}
             className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-all border border-surface-container shadow-2xs"
@@ -346,6 +357,14 @@ export default function ProductsView({
                           </button>
 
                           <button
+                            onClick={() => onOpenLabelsModal?.(p.sku)}
+                            className="p-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-secondary hover:text-primary-light transition-colors border border-surface-container"
+                            title="Print Scannable Shelf Label"
+                          >
+                            <Tag className="w-3.5 h-3.5" />
+                          </button>
+
+                          <button
                             onClick={() => handleOpenInspect(p)}
                             className="p-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-secondary hover:text-on-surface transition-colors border border-surface-container"
                             title="Inspect & Edit Details"
@@ -530,6 +549,19 @@ export default function ProductsView({
                         <span>Edit</span>
                       </button>
                     )}
+
+                    <button
+                      onClick={() => {
+                        const targetSku = inspectProduct.sku;
+                        setInspectProduct(null);
+                        onOpenLabelsModal?.(targetSku);
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-primary-light flex items-center gap-1 border border-surface-container transition-colors"
+                      title="Generate Shelf Sticker"
+                    >
+                      <Tag className="w-3.5 h-3.5" />
+                      <span>Print Label</span>
+                    </button>
 
                     <button
                       onClick={() => {
