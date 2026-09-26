@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
 import { exportToCSV } from '../utils/export';
+import {
+  Printer,
+  FileSpreadsheet,
+  Search,
+  Inbox,
+  ShieldCheck,
+  ChevronRight
+} from 'lucide-react';
 
 export default function StockLedgerView() {
   const { ledger, triggerToast } = useInventory();
@@ -32,37 +40,42 @@ export default function StockLedgerView() {
         <div>
           <div className="flex items-center gap-2 text-xs text-secondary mb-1">
             <span>StockSense IMS</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <ChevronRight className="w-3.5 h-3.5" />
             <span className="text-on-surface font-semibold">Move History</span>
           </div>
-          <h1 className="font-headline text-2xl font-bold tracking-tight text-on-surface">
-            The Double-Entry Stock Ledger
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="font-headline text-2xl font-bold tracking-tight text-on-surface">
+              The Double-Entry Stock Ledger
+            </h1>
+            <span className="inline-flex items-center gap-1 font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-tertiary-container/30 text-tertiary font-bold border border-tertiary/30">
+              <ShieldCheck className="w-3.5 h-3.5" /> Append-Only Audit Trail
+            </span>
+          </div>
           <p className="text-xs text-secondary mt-1">
-            The single source of truth for all inventory movements. Every transaction balanced with debit &amp; credit source/destination.
+            The single source of truth for all inventory movements. Every debit strictly balanced with a credit location.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={handleExport}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-all shadow-2xs"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-all border border-surface-container shadow-2xs"
           >
-            <span className="material-symbols-outlined text-[18px] text-secondary">table_chart</span>
-            <span>Export Ledger CSV</span>
+            <FileSpreadsheet className="w-4 h-4 text-secondary" />
+            <span>Export CSV</span>
           </button>
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-primary-container text-on-primary text-xs font-bold hover:bg-primary transition-colors shadow-sm"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover transition-colors shadow-purple-glow"
           >
-            <span className="material-symbols-outlined text-[18px]">print</span>
+            <Printer className="w-4 h-4" />
             <span>Print Ledger</span>
           </button>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-surface-container flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      <div className="bg-surface-container-lowest p-4 rounded-xl shadow-card-depth border border-surface-container flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
           {[
             { id: 'all', label: `All Entries (${ledger.length})` },
@@ -74,10 +87,10 @@ export default function StockLedgerView() {
             <button
               key={tab.id}
               onClick={() => setTypeFilter(tab.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors border ${
                 typeFilter === tab.id
-                  ? 'bg-primary-container text-on-primary shadow-xs'
-                  : 'text-secondary hover:bg-surface-container-low hover:text-on-surface'
+                  ? 'bg-primary-container text-on-primary border-primary shadow-xs'
+                  : 'text-secondary hover:bg-surface-container hover:text-on-surface border-transparent'
               }`}
             >
               {tab.label}
@@ -86,38 +99,41 @@ export default function StockLedgerView() {
         </div>
 
         <div className="relative min-w-[260px]">
-          <span className="material-symbols-outlined absolute left-2.5 top-2 text-[18px] text-secondary">search</span>
+          <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-secondary" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search Reference, SKU or Location..."
-            className="w-full h-9 pl-8 pr-3 bg-surface-container-low text-xs rounded-lg outline-none focus:ring-1 focus:ring-primary"
+            className="w-full h-9 pl-8 pr-3 bg-surface-container-low text-xs text-on-surface rounded-lg outline-none focus:ring-1 focus:ring-primary border border-surface-container"
           />
         </div>
       </div>
 
-      {/* Ledger Table */}
-      <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-surface-container">
+      {/* Ledger Table (Append-only: No edit or delete actions) */}
+      <div className="bg-surface-container-lowest rounded-xl shadow-card-depth overflow-hidden border border-surface-container">
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-surface-container-low text-on-surface-variant font-mono text-[11px] uppercase tracking-wider font-semibold">
+              <tr className="bg-surface-container-low text-on-surface-variant font-mono text-[11px] uppercase tracking-wider font-semibold border-b border-surface-container">
                 <th className="py-2.5 px-3">Reference ID</th>
                 <th className="py-2.5 px-3">Date &amp; Time</th>
                 <th className="py-2.5 px-3">Product Name &amp; SKU</th>
-                <th className="py-2.5 px-3">From Location</th>
-                <th className="py-2.5 px-3">To Location</th>
+                <th className="py-2.5 px-3">From Location (Credit)</th>
+                <th className="py-2.5 px-3">To Location (Debit)</th>
                 <th className="py-2.5 px-3 text-right">Quantity</th>
-                <th className="py-2.5 px-3 text-right">Value (₹)</th>
+                <th className="py-2.5 px-3 text-right">Valuation (₹)</th>
                 <th className="py-2.5 px-3 text-center">Status</th>
               </tr>
             </thead>
             <tbody className="text-xs text-on-surface divide-y divide-surface-container font-body">
               {filteredLedger.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="py-8 text-center text-secondary">
-                    No ledger entries found matching filters.
+                  <td colSpan="8" className="py-12 text-center text-secondary">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <Inbox className="w-8 h-8 text-secondary/50" />
+                      <span>No ledger moves match the current filter.</span>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -127,7 +143,7 @@ export default function StockLedgerView() {
 
                   return (
                     <tr key={item.id} className="hover:bg-surface-container-low/60 transition-colors">
-                      <td className="py-2.5 px-3 font-mono font-bold text-primary">
+                      <td className="py-2.5 px-3 font-mono font-bold text-primary-light">
                         {item.ref}
                       </td>
 
@@ -159,8 +175,8 @@ export default function StockLedgerView() {
                       </td>
 
                       <td className="py-2.5 px-3 text-center">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full font-mono text-[10px] uppercase font-bold bg-emerald-100 text-emerald-800">
-                          {item.status || 'Done'}
+                        <span className="inline-block px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-mono text-[10px] font-bold border border-emerald-500/30">
+                          Done
                         </span>
                       </td>
                     </tr>

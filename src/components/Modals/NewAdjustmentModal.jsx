@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useInventory } from '../../context/InventoryContext';
+import { SlidersHorizontal, X } from 'lucide-react';
 
 export default function NewAdjustmentModal({ isOpen, onClose }) {
-  const { products, createAdjustment } = useInventory();
+  const { products, createAdjustment, triggerToast } = useInventory();
 
-  const [location, setLocation] = useState('WH1: Central Store');
+  const [location, setLocation] = useState('WH1: Main Store Rack A/B');
   const [selectedSku, setSelectedSku] = useState(products[0]?.sku || 'RAW-STL-001');
   const [physicalCount, setPhysicalCount] = useState(products[0]?.totalStock || 100);
   const [reason, setReason] = useState('Damaged Items');
@@ -19,6 +20,11 @@ export default function NewAdjustmentModal({ isOpen, onClose }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (Number(physicalCount) < 0) {
+      triggerToast('Physical count cannot be negative', 'error');
+      return;
+    }
+
     createAdjustment({
       location,
       sku: selectedSku,
@@ -30,11 +36,13 @@ export default function NewAdjustmentModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs">
       <div className="w-full max-w-lg rounded-2xl bg-surface-container-lowest p-6 shadow-2xl border border-surface-container flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between pb-3 border-b border-surface-container">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[24px] text-error">tune</span>
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-error-container/20 text-error border border-error/20">
+              <SlidersHorizontal className="w-5 h-5" />
+            </div>
             <div>
               <h3 className="font-headline text-lg font-bold text-on-surface">Physical Inventory Adjustment</h3>
               <p className="text-xs text-secondary font-mono">Cycle Count Audit • System vs Physical Reconciliation</p>
@@ -44,27 +52,29 @@ export default function NewAdjustmentModal({ isOpen, onClose }) {
             onClick={onClose}
             className="p-1 rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition-colors"
           >
-            <span className="material-symbols-outlined text-[20px]">close</span>
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-bold text-on-surface mb-1 block">Storage Location Audited</label>
+              <label className="text-xs font-bold text-on-surface mb-1 block">Storage Node Audited</label>
               <select
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary"
+                className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary font-medium"
               >
-                <option value="WH1: Central Store">WH1: Central Store</option>
+                <option value="WH1: Main Store Rack A/B">WH1: Main Store Rack A/B</option>
                 <option value="WH2: Production Floor">WH2: Production Floor</option>
-                <option value="WH1: Staging Bay A03">WH1: Staging Bay A03</option>
+                <option value="WH1: Staging Area">WH1: Staging Area</option>
+                <option value="WH1: Cold Storage Bin">WH1: Cold Storage Bin</option>
+                <option value="WH2: Raw Material Silo">WH2: Raw Material Silo</option>
               </select>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-on-surface mb-1 block">Select Product SKU</label>
+              <label className="text-xs font-bold text-on-surface mb-1 block">Product SKU</label>
               <select
                 value={selectedSku}
                 onChange={(e) => {
@@ -72,7 +82,7 @@ export default function NewAdjustmentModal({ isOpen, onClose }) {
                   const p = products.find(item => item.sku === e.target.value);
                   if (p) setPhysicalCount(p.totalStock);
                 }}
-                className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary font-mono"
+                className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary font-mono font-semibold"
               >
                 {products.map(p => (
                   <option key={p.sku} value={p.sku}>
@@ -121,11 +131,11 @@ export default function NewAdjustmentModal({ isOpen, onClose }) {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-on-surface mb-1 block">Adjustment Reason</label>
+              <label className="text-xs font-bold text-on-surface mb-1 block">Discrepancy Category</label>
               <select
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary"
+                className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary font-medium"
               >
                 <option value="Damaged Items">Damaged Items (Handling / Storage)</option>
                 <option value="Cycle Count Discrepancy">Cycle Count Discrepancy</option>
@@ -137,7 +147,7 @@ export default function NewAdjustmentModal({ isOpen, onClose }) {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-on-surface mb-1 block">Audit Notes / Disposal Authorization</label>
+            <label className="text-xs font-bold text-on-surface mb-1 block">Audit Notes / Scrap Authorization</label>
             <input
               type="text"
               value={notes}
@@ -157,9 +167,9 @@ export default function NewAdjustmentModal({ isOpen, onClose }) {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg bg-error text-on-error text-xs font-bold hover:opacity-90 shadow-sm transition-all"
+              className="px-4 py-2 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-hover shadow-purple-glow transition-all"
             >
-              Apply Adjustment &amp; Reconcile
+              Reconcile &amp; Book Ledger Move
             </button>
           </div>
         </form>
