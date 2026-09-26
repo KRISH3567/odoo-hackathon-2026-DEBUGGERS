@@ -16,10 +16,17 @@ import {
   Sparkles,
   Barcode,
   ArrowRight,
-  Boxes
+  Boxes,
+  PlusCircle
 } from 'lucide-react';
 
-export default function ProductsView({ onOpenNewProductModal, onOpenAdjustmentModal, onOpenTransferModal }) {
+export default function ProductsView({
+  onOpenNewProductModal,
+  onOpenReceiptModal,
+  onOpenAdjustmentModal,
+  onOpenTransferModal,
+  onOpenQuickRestockModal
+}) {
   const {
     products,
     selectedProductSku,
@@ -135,12 +142,27 @@ export default function ProductsView({ onOpenNewProductModal, onOpenAdjustmentMo
             <Download className="w-4 h-4 text-secondary" />
             <span>Export Catalog</span>
           </button>
+          {onOpenReceiptModal && (
+            <button
+              onClick={() => onOpenReceiptModal()}
+              className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-all border border-surface-container shadow-2xs"
+            >
+              <span>+ Inbound PO</span>
+            </button>
+          )}
+          <button
+            onClick={() => onOpenQuickRestockModal?.()}
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold hover:bg-emerald-500/30 transition-all active:scale-95 shadow-2xs"
+          >
+            <PlusCircle className="w-4 h-4 text-emerald-400" />
+            <span>+ Receive Stock</span>
+          </button>
           <button
             onClick={onOpenNewProductModal}
             className="flex items-center gap-1.5 h-9 px-4 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-hover transition-colors shadow-purple-glow active:scale-95"
           >
             <Plus className="w-4 h-4" />
-            <span>New Product</span>
+            <span>+ Add Product</span>
           </button>
         </div>
       </div>
@@ -419,6 +441,18 @@ export default function ProductsView({ onOpenNewProductModal, onOpenAdjustmentMo
 
                           <td className="py-3 px-3 text-right">
                             <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onOpenQuickRestockModal?.(p.sku);
+                                }}
+                                className="px-2 py-1 rounded bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-[11px] font-semibold transition-colors flex items-center gap-1"
+                                title="Quick Inbound Stock Receive"
+                              >
+                                <PlusCircle className="w-3 h-3" />
+                                <span>Receive</span>
+                              </button>
+
                               {isLow ? (
                                 <button
                                   onClick={(e) => {
@@ -576,8 +610,16 @@ export default function ProductsView({ onOpenNewProductModal, onOpenAdjustmentMo
               {/* 1-Click Operational Actions */}
               <div className="flex flex-col gap-2 pt-1">
                 <button
+                  onClick={() => onOpenQuickRestockModal?.(selectedProduct.sku)}
+                  className="w-full h-10 px-4 rounded-xl bg-tertiary text-navy-base text-xs font-bold hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 shadow-md active:scale-95"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>Quick Inbound Stock (+Receive)</span>
+                </button>
+
+                <button
                   onClick={() => generateDraftPO(selectedProduct.sku, 50)}
-                  className="w-full h-10 px-4 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover transition-colors flex items-center justify-center gap-2 shadow-purple-glow"
+                  className="w-full h-9 px-4 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover transition-colors flex items-center justify-center gap-2 shadow-purple-glow"
                 >
                   <Zap className="w-4 h-4 fill-white" />
                   <span>Generate PO to {selectedProduct.supplier} (+50)</span>

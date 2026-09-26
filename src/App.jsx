@@ -16,6 +16,7 @@ import NewDeliveryModal from './components/Modals/NewDeliveryModal';
 import NewTransferModal from './components/Modals/NewTransferModal';
 import NewAdjustmentModal from './components/Modals/NewAdjustmentModal';
 import NewProductModal from './components/Modals/NewProductModal';
+import QuickRestockModal from './components/Modals/QuickRestockModal';
 import SlipModal from './components/Modals/SlipModal';
 import BarcodeScannerModal from './components/Modals/BarcodeScannerModal';
 import AuthModal from './components/Modals/AuthModal';
@@ -36,6 +37,8 @@ function AppContent() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isQuickRestockModalOpen, setIsQuickRestockModalOpen] = useState(false);
+  const [quickRestockSku, setQuickRestockSku] = useState(null);
 
   const [activeSlipOperation, setActiveSlipOperation] = useState(null);
 
@@ -45,6 +48,11 @@ function AppContent() {
 
   const handleCloseSlip = () => {
     setActiveSlipOperation(null);
+  };
+
+  const handleOpenQuickRestock = (sku) => {
+    setQuickRestockSku(sku || null);
+    setIsQuickRestockModalOpen(true);
   };
 
   return (
@@ -72,9 +80,12 @@ function AppContent() {
         <main className="w-full pt-[124px] px-4 sm:px-8 pb-12 bg-surface min-h-screen">
           {currentView === 'dashboard' && (
             <DashboardView
+              onOpenNewProductModal={() => setIsProductModalOpen(true)}
               onOpenReceiptModal={() => setIsReceiptModalOpen(true)}
+              onOpenDeliveryModal={() => setIsDeliveryModalOpen(true)}
               onOpenTransferModal={() => setIsTransferModalOpen(true)}
               onOpenAdjustmentModal={() => setIsAdjustmentModalOpen(true)}
+              onOpenQuickRestockModal={handleOpenQuickRestock}
               onOpenSlipModal={handleOpenSlip}
             />
           )}
@@ -82,8 +93,10 @@ function AppContent() {
           {currentView === 'products' && (
             <ProductsView
               onOpenNewProductModal={() => setIsProductModalOpen(true)}
+              onOpenReceiptModal={() => setIsReceiptModalOpen(true)}
               onOpenAdjustmentModal={() => setIsAdjustmentModalOpen(true)}
               onOpenTransferModal={() => setIsTransferModalOpen(true)}
+              onOpenQuickRestockModal={handleOpenQuickRestock}
             />
           )}
 
@@ -139,6 +152,12 @@ function AppContent() {
       <NewProductModal
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
+      />
+
+      <QuickRestockModal
+        isOpen={isQuickRestockModalOpen}
+        onClose={() => setIsQuickRestockModalOpen(false)}
+        initialSku={quickRestockSku}
       />
 
       <BarcodeScannerModal

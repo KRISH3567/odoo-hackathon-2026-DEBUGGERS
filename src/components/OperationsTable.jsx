@@ -13,7 +13,13 @@ import {
   Inbox
 } from 'lucide-react';
 
-export default function OperationsTable({ onOpenSlipModal }) {
+export default function OperationsTable({
+  onOpenSlipModal,
+  onOpenReceiptModal,
+  onOpenDeliveryModal,
+  onOpenTransferModal,
+  onOpenAdjustmentModal
+}) {
   const {
     operations,
     validateReceipt,
@@ -88,7 +94,39 @@ export default function OperationsTable({ onOpenSlipModal }) {
             Multi-warehouse ledger tracking live picking, transfers, adjustments and incoming manifests
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {onOpenReceiptModal && (
+            <button
+              onClick={onOpenReceiptModal}
+              className="px-2.5 py-1.5 rounded-lg bg-tertiary-container/30 text-tertiary border border-tertiary/30 text-xs font-bold hover:bg-tertiary/20 transition-all flex items-center gap-1 shadow-2xs"
+            >
+              <span>+ Receipt</span>
+            </button>
+          )}
+          {onOpenDeliveryModal && (
+            <button
+              onClick={onOpenDeliveryModal}
+              className="px-2.5 py-1.5 rounded-lg bg-primary-container text-on-primary border border-primary/30 text-xs font-bold hover:bg-primary transition-all flex items-center gap-1 shadow-2xs"
+            >
+              <span>+ Delivery</span>
+            </button>
+          )}
+          {onOpenTransferModal && (
+            <button
+              onClick={onOpenTransferModal}
+              className="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface border border-surface-container text-xs font-semibold transition-all flex items-center gap-1 shadow-2xs"
+            >
+              <span>⇄ Move</span>
+            </button>
+          )}
+          {onOpenAdjustmentModal && (
+            <button
+              onClick={onOpenAdjustmentModal}
+              className="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface border border-surface-container text-xs font-semibold transition-all flex items-center gap-1 shadow-2xs"
+            >
+              <span>± Audit</span>
+            </button>
+          )}
           <button
             onClick={() => {
               exportToCSV(operations, 'StockSense_Operations_Export');

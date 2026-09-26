@@ -5,15 +5,35 @@ import FlowMap from '../components/FlowMap';
 import OperationsTable from '../components/OperationsTable';
 import RightColumnIntelligence from '../components/RightColumnIntelligence';
 import { useInventory } from '../context/InventoryContext';
-import { Layers, Warehouse, Cpu, Truck, Trash2 } from 'lucide-react';
+import {
+  Layers,
+  Warehouse,
+  Cpu,
+  Truck,
+  Trash2,
+  Plus,
+  ArrowDownLeft,
+  ArrowLeftRight,
+  SlidersHorizontal,
+  Zap
+} from 'lucide-react';
 
 export default function DashboardView({
+  onOpenNewProductModal,
   onOpenReceiptModal,
+  onOpenDeliveryModal,
   onOpenTransferModal,
   onOpenAdjustmentModal,
+  onOpenQuickRestockModal,
   onOpenSlipModal
 }) {
-  const { products } = useInventory();
+  const {
+    products,
+    isLiveStreamActive,
+    setIsLiveStreamActive,
+    simulateLiveEvent,
+    triggerToast
+  } = useInventory();
 
   // Multi-location breakdown counts
   const wh1StoreTotal = products.reduce((acc, p) => acc + ((p.locations && p.locations['wh1-store']) || 0), 0);
@@ -33,6 +53,110 @@ export default function DashboardView({
       {/* 2. Top 5 Executive KPI Metric Cards with Animated Counter */}
       <KpiCards />
 
+      {/* 2.5 Manager Quick Action & Real-World Live Suite */}
+      <div className="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-card-depth flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+        {/* Left: Quick Inflow & Outflow Action Buttons */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-bold text-on-surface uppercase tracking-wider font-mono mr-1 hidden sm:inline">
+            Manager Actions:
+          </span>
+
+          <button
+            onClick={onOpenNewProductModal}
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover transition-all shadow-purple-glow active:scale-95"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>+ Add Product</span>
+          </button>
+
+          <button
+            onClick={onOpenReceiptModal}
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-tertiary-container/30 text-tertiary border border-tertiary/30 text-xs font-bold hover:bg-tertiary/20 transition-all active:scale-95"
+          >
+            <ArrowDownLeft className="w-3.5 h-3.5" />
+            <span>+ Inbound PO</span>
+          </button>
+
+          <button
+            onClick={onOpenDeliveryModal}
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface border border-surface-container text-xs font-bold transition-all active:scale-95"
+          >
+            <Truck className="w-3.5 h-3.5 text-primary-light" />
+            <span>- Dispatch</span>
+          </button>
+
+          <button
+            onClick={onOpenTransferModal}
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface border border-surface-container text-xs font-semibold transition-all active:scale-95"
+          >
+            <ArrowLeftRight className="w-3.5 h-3.5 text-secondary" />
+            <span>⇄ Transfer</span>
+          </button>
+
+          <button
+            onClick={onOpenAdjustmentModal}
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface border border-surface-container text-xs font-semibold transition-all active:scale-95"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5 text-error" />
+            <span>± Audit</span>
+          </button>
+
+          <button
+            onClick={() => onOpenQuickRestockModal()}
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-bold hover:bg-emerald-500/25 transition-all active:scale-95"
+          >
+            <Zap className="w-3.5 h-3.5" />
+            <span>1-Click Restock</span>
+          </button>
+        </div>
+
+        {/* Right: Live Stream Real-Time Simulator */}
+        <div className="flex items-center gap-2 pt-2 xl:pt-0 border-t xl:border-t-0 border-surface-container flex-wrap">
+          {/* 1-Click Live Event Triggers */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => simulateLiveEvent('order')}
+              className="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-mono text-[11px] font-semibold border border-surface-container transition-all active:scale-95"
+              title="Simulate immediate customer sales order"
+            >
+              ⚡ Live Order
+            </button>
+            <button
+              onClick={() => simulateLiveEvent('receipt')}
+              className="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-mono text-[11px] font-semibold border border-surface-container transition-all active:scale-95"
+              title="Simulate immediate vendor delivery"
+            >
+              ⚡ Live Supply
+            </button>
+          </div>
+
+          <div className="h-5 w-px bg-outline/20 hidden sm:block"></div>
+
+          {/* Real-time background feed toggle */}
+          <button
+            onClick={() => {
+              const next = !isLiveStreamActive;
+              setIsLiveStreamActive(next);
+              triggerToast(
+                next 
+                  ? '🟢 Live Stream Activated: Real-world customer orders & supply inflows will process in real-time!' 
+                  : '⏸️ Live Stream Paused'
+              );
+            }}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+              isLiveStreamActive
+                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+                : 'bg-surface-container text-secondary border-surface-container hover:text-on-surface'
+            }`}
+          >
+            <span className={`w-2 h-2 rounded-full ${isLiveStreamActive ? 'bg-emerald-400 animate-ping' : 'bg-secondary'}`}></span>
+            <span className="font-mono text-[11px]">
+              {isLiveStreamActive ? 'LIVE FEED: ON' : 'LIVE FEED: OFF'}
+            </span>
+          </button>
+        </div>
+      </div>
+
       {/* 3. Main Split Layout (68% Left | 32% Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column (lg:col-span-8) */}
@@ -41,7 +165,13 @@ export default function DashboardView({
           <FlowMap />
 
           {/* Operations Hub & Live Stock Moves Table */}
-          <OperationsTable onOpenSlipModal={onOpenSlipModal} />
+          <OperationsTable
+            onOpenSlipModal={onOpenSlipModal}
+            onOpenReceiptModal={onOpenReceiptModal}
+            onOpenDeliveryModal={onOpenDeliveryModal}
+            onOpenTransferModal={onOpenTransferModal}
+            onOpenAdjustmentModal={onOpenAdjustmentModal}
+          />
 
           {/* Multi-Location Breakdown Quick Matrix */}
           <section className="p-4 rounded-xl bg-surface-container-lowest shadow-card-depth flex flex-col gap-3 border border-surface-container">
