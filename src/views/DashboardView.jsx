@@ -12,7 +12,7 @@ export default function DashboardView({
   onOpenAdjustmentModal,
   onOpenSlipModal
 }) {
-  const { products, locations } = useInventory();
+  const { products } = useInventory();
 
   // Multi-location breakdown counts
   const wh1StoreTotal = products.reduce((acc, p) => acc + ((p.locations && p.locations['wh1-store']) || 0), 0);

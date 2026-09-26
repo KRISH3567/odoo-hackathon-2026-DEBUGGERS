@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useInventory } from '../../context/InventoryContext';
 
 export default function AuthModal({ isOpen, onClose }) {
-  const { user, setUser, triggerToast } = useInventory();
+  const { setUser, triggerToast } = useInventory();
 
   const [mode, setMode] = useState('signin'); // 'signin' | 'signup' | 'forgot' | 'otp'
   const [email, setEmail] = useState('alex.vance@stocksense.io');

@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { useInventory } from '../../context/InventoryContext';
 
 export default function BarcodeScannerModal({ isOpen, onClose }) {
-  const { simulateBarcodeScan, triggerToast } = useInventory();
+  const { simulateBarcodeScan } = useInventory();
   const [inputCode, setInputCode] = useState('');
   const [scanResult, setScanResult] = useState(null);
-  const [laserActive, setLaserActive] = useState(true);
 
   if (!isOpen) return null;
 
@@ -43,9 +42,8 @@ export default function BarcodeScannerModal({ isOpen, onClose }) {
         {/* Laser Scanner Viewport */}
         <div className="relative h-44 bg-inverse-surface rounded-xl overflow-hidden flex flex-col items-center justify-center p-4 shadow-inner border border-outline/20">
           {/* Animated Laser Beam */}
-          {laserActive && (
-            <div className="absolute left-0 right-0 h-1 bg-red-500 shadow-[0_0_12px_#ff0000] animate-scan-beam"></div>
-          )}
+          <div className="absolute left-0 right-0 h-1 bg-red-500 shadow-[0_0_12px_#ff0000] animate-scan-beam"></div>
+
 
           {/* Crosshairs & Target Box */}
           <div className="w-48 h-24 border-2 border-dashed border-white/40 rounded-lg flex items-center justify-center relative">

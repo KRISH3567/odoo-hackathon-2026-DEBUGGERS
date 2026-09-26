@@ -8,7 +8,6 @@ export default function ProductsView({ onOpenNewProductModal, onOpenAdjustmentMo
     selectedProductSku,
     setSelectedProductSku,
     generateDraftPO,
-    totalUnits,
     totalValuation,
     lowStockCount,
     triggerToast
@@ -29,6 +28,10 @@ export default function ProductsView({ onOpenNewProductModal, onOpenAdjustmentMo
       p.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.barcode.includes(searchQuery);
 
+    const matchWarehouse = warehouseFilter === 'all' ||
+      (warehouseFilter === 'wh1' && ((p.locations && p.locations['wh1-store']) || 0) > 0) ||
+      (warehouseFilter === 'wh2' && ((p.locations && p.locations['wh2-prod']) || 0) > 0);
+
     const isLow = p.totalStock <= p.minStock;
     const isPerish = p.isPerishable;
     const matchStatus = statusFilter === 'all' ||
@@ -36,7 +39,7 @@ export default function ProductsView({ onOpenNewProductModal, onOpenAdjustmentMo
       (statusFilter === 'low_stock' && isLow) ||
       (statusFilter === 'fefo' && isPerish);
 
-    return matchCat && matchSearch && matchStatus;
+    return matchCat && matchSearch && matchWarehouse && matchStatus;
   });
 
   const handleExport = () => {
@@ -197,6 +200,16 @@ export default function ProductsView({ onOpenNewProductModal, onOpenAdjustmentMo
               </div>
 
               <div className="flex items-center gap-2">
+                <select
+                  value={warehouseFilter}
+                  onChange={(e) => setWarehouseFilter(e.target.value)}
+                  className="h-9 px-3 bg-surface-container-low text-on-surface text-xs font-semibold rounded-lg outline-none cursor-pointer border-0"
+                >
+                  <option value="all">All Locations (Consolidated)</option>
+                  <option value="wh1">WH1: Central Warehouse</option>
+                  <option value="wh2">WH2: Manufacturing Plant</option>
+                </select>
+
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
@@ -368,6 +381,16 @@ export default function ProductsView({ onOpenNewProductModal, onOpenAdjustmentMo
                                 Inspect
                               </button>
                             )}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onOpenAdjustmentModal();
+                              }}
+                              className="p-1 rounded hover:bg-surface-container text-secondary hover:text-on-surface"
+                              title="Audit & Adjust Stock"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">tune</span>
+                            </button>
                           </div>
                         </td>
                       </tr>

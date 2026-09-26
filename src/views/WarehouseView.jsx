@@ -2,7 +2,7 @@ import React from 'react';
 import { useInventory } from '../context/InventoryContext';
 
 export default function WarehouseView() {
-  const { locations, products } = useInventory();
+  const { products } = useInventory();
 
   // Compute total items per location
   const getLocationStock = (locKey) => {

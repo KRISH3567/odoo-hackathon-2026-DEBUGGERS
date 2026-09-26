@@ -135,6 +135,17 @@ export default function Header({ onOpenScanModal, onOpenNewProductModal }) {
             <span className="hidden sm:inline">Scan In</span>
           </button>
 
+          {/* New Product Trigger */}
+          <button
+            onClick={onOpenNewProductModal}
+            className="hidden sm:flex items-center gap-1.5 h-9 px-3 rounded bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-colors shadow-2xs"
+            title="Create New Product SKU"
+          >
+            <span className="material-symbols-outlined text-[16px] text-primary">add</span>
+            <span>+ Product</span>
+          </button>
+
+
           {/* Notifications */}
           <button
             onClick={() => {

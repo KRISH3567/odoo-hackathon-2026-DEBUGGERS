@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useInventory } from '../context/InventoryContext';
 import OperationsTable from '../components/OperationsTable';
 
