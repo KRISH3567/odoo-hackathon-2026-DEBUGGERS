@@ -1,6 +1,14 @@
 import React from 'react';
 import { useInventory } from '../context/InventoryContext';
 import OperationsTable from '../components/OperationsTable';
+import {
+  ArrowDownLeft,
+  Truck,
+  ArrowLeftRight,
+  SlidersHorizontal,
+  ChevronRight,
+  PlusCircle
+} from 'lucide-react';
 
 export default function OperationsView({
   onOpenReceiptModal,
@@ -18,47 +26,47 @@ export default function OperationsView({
         <div>
           <div className="flex items-center gap-2 text-xs text-secondary mb-1">
             <span>StockSense IMS</span>
-            <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+            <ChevronRight className="w-3.5 h-3.5" />
             <span className="text-on-surface font-semibold">Warehouse Operations Hub</span>
           </div>
           <h1 className="font-headline text-2xl font-bold tracking-tight text-on-surface">
             Warehouse Operations &amp; Stock Movements
           </h1>
           <p className="text-xs text-secondary mt-1">
-            Execute double-entry receipts, customer picking &amp; packing, internal transfers, and physical cycle counts.
+            Execute double-entry vendor receipts, customer deliveries, bin transfers, and physical cycle counts.
           </p>
         </div>
 
         <div className="flex items-center flex-wrap gap-2">
           <button
             onClick={onOpenReceiptModal}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-tertiary-container text-on-tertiary text-xs font-bold hover:opacity-90 transition-opacity shadow-sm"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-tertiary text-white text-xs font-bold hover:opacity-90 transition-opacity shadow-sm"
           >
-            <span className="material-symbols-outlined text-[18px]">add_box</span>
+            <PlusCircle className="w-4 h-4" />
             <span>New Receipt</span>
           </button>
 
           <button
             onClick={onOpenDeliveryModal}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-primary-container text-on-primary text-xs font-bold hover:bg-primary transition-colors shadow-sm"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover transition-colors shadow-purple-glow"
           >
-            <span className="material-symbols-outlined text-[18px]">local_shipping</span>
+            <Truck className="w-4 h-4" />
             <span>New Delivery</span>
           </button>
 
           <button
             onClick={onOpenTransferModal}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-secondary text-on-secondary text-xs font-bold hover:bg-on-surface transition-colors shadow-sm"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-surface-container-high text-on-surface text-xs font-bold hover:bg-surface-container-highest transition-colors border border-surface-container shadow-2xs"
           >
-            <span className="material-symbols-outlined text-[18px]">swap_horiz</span>
-            <span>Internal Transfer</span>
+            <ArrowLeftRight className="w-4 h-4 text-primary-light" />
+            <span>Internal Move</span>
           </button>
 
           <button
             onClick={onOpenAdjustmentModal}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold transition-colors shadow-2xs"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold transition-colors border border-surface-container shadow-2xs"
           >
-            <span className="material-symbols-outlined text-[18px]">tune</span>
+            <SlidersHorizontal className="w-4 h-4 text-error" />
             <span>Cycle Count</span>
           </button>
         </div>
@@ -66,36 +74,36 @@ export default function OperationsView({
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-card-depth flex items-center justify-between">
           <div className="flex flex-col">
             <span className="font-mono text-[11px] text-secondary font-bold uppercase">Pending Vendor Receipts</span>
             <span className="font-headline text-2xl font-bold text-on-surface mt-1">{pendingReceiptsCount} Shipments</span>
             <span className="text-xs text-tertiary font-semibold mt-0.5">Ready for Receiving Dock</span>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-tertiary-container/15 text-tertiary flex items-center justify-center">
-            <span className="material-symbols-outlined text-[24px]">move_to_inbox</span>
+          <div className="w-10 h-10 rounded-xl bg-tertiary/10 border border-tertiary/20 text-tertiary flex items-center justify-center">
+            <ArrowDownLeft className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-card-depth flex items-center justify-between">
           <div className="flex flex-col">
             <span className="font-mono text-[11px] text-secondary font-bold uppercase">Pending Customer Deliveries</span>
             <span className="font-headline text-2xl font-bold text-on-surface mt-1">{pendingDeliveriesCount} Orders</span>
-            <span className="text-xs text-primary font-semibold mt-0.5">Pick &amp; Pack Verification</span>
+            <span className="text-xs text-primary-light font-semibold mt-0.5">Pick &amp; Pack Verification</span>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-primary-container/15 text-primary flex items-center justify-center">
-            <span className="material-symbols-outlined text-[24px]">local_shipping</span>
+          <div className="w-10 h-10 rounded-xl bg-primary-container/20 border border-primary/20 text-primary-light flex items-center justify-center">
+            <Truck className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-xs flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-card-depth flex items-center justify-between">
           <div className="flex flex-col">
             <span className="font-mono text-[11px] text-secondary font-bold uppercase">Scheduled Internal Moves</span>
             <span className="font-headline text-2xl font-bold text-on-surface mt-1">{scheduledTransfersCount} Transfers</span>
-            <span className="text-xs text-secondary font-semibold mt-0.5">Bin &amp; Silo Relocations</span>
+            <span className="text-xs text-secondary font-semibold mt-0.5">Zero Delta Balance</span>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-secondary-container text-on-secondary-fixed flex items-center justify-center">
-            <span className="material-symbols-outlined text-[24px]">swap_horiz</span>
+          <div className="w-10 h-10 rounded-xl bg-surface-container border border-surface-container text-secondary flex items-center justify-center">
+            <ArrowLeftRight className="w-5 h-5" />
           </div>
         </div>
       </div>

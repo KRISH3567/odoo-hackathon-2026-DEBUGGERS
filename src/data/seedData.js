@@ -2,13 +2,15 @@
 // Compliant with Odoo Hackathon 2026 PRD Specification (Team DEBUGGERS)
 
 export const INITIAL_LOCATIONS = [
-  { id: 'wh1-store', name: 'WH1: Central Store', type: 'internal', capacity: 2000, current: 1420, rack: 'Rack A/B' },
-  { id: 'wh1-staging', name: 'WH1: Staging Bay A03', type: 'internal', capacity: 500, current: 114, rack: 'Bay 03' },
-  { id: 'wh1-cold', name: 'WH1: Cold Storage Bin', type: 'internal', capacity: 400, current: 210, rack: 'Cold-01' },
-  { id: 'wh2-prod', name: 'WH2: Production Floor', type: 'internal', capacity: 1500, current: 445, rack: 'Floor Silo' },
+  { id: 'wh1-store', name: 'WH1: Main Store Rack A/B', type: 'internal', capacity: 2000, current: 1420, warehouse: 'wh1', rack: 'Rack A/B' },
+  { id: 'wh1-staging', name: 'WH1: Staging Area', type: 'internal', capacity: 500, current: 114, warehouse: 'wh1', rack: 'Staging Bay A03' },
+  { id: 'wh1-cold', name: 'WH1: Cold Storage Bin', type: 'internal', capacity: 400, current: 210, warehouse: 'wh1', rack: 'Cold-01' },
+  { id: 'wh2-prod', name: 'WH2: Production Floor', type: 'internal', capacity: 1500, current: 445, warehouse: 'wh2', rack: 'Floor Silo' },
+  { id: 'wh2-silo', name: 'WH2: Raw Material Silo', type: 'internal', capacity: 2500, current: 600, warehouse: 'wh2', rack: 'Silo Bay 01' },
   { id: 'virtual-vendor', name: 'Vendors (Partner / Virtual)', type: 'supplier', capacity: 999999, current: 0 },
   { id: 'virtual-customer', name: 'Customers (Partner / Virtual)', type: 'customer', capacity: 999999, current: 0 },
-  { id: 'virtual-scrap', name: 'Virtual Scrap & Damaged', type: 'inventory_loss', capacity: 999999, current: 10 },
+  { id: 'virtual-scrap', name: 'Virtual Scrap & Damaged', type: 'inventory_loss', capacity: 999999, current: 3 },
+  { id: 'virtual-loss', name: 'Virtual / Inventory Loss', type: 'inventory_loss', capacity: 999999, current: 0 },
 ];
 
 export const INITIAL_PRODUCTS = [
@@ -21,16 +23,17 @@ export const INITIAL_PRODUCTS = [
     uom: 'kg',
     costPrice: 65,
     sellingPrice: 92,
-    totalStock: 100,
+    totalStock: 0, // Starts at 0 so 1-Click Odoo Flow executes cleanly: 100 in -> 80 transfer -> 20 out -> 3 damaged -> exactly 77 kg!
     minStock: 40,
     dailyDemand: 4.5,
     leadTimeDays: 5,
     safetyStock: 15,
     locations: {
-      'wh1-store': 80,
-      'wh2-prod': 20,
+      'wh1-store': 0,
+      'wh2-prod': 0,
       'wh1-staging': 0,
       'wh1-cold': 0,
+      'wh2-silo': 0,
       'virtual-scrap': 0
     },
     barcode: '8901230490010',
@@ -57,6 +60,7 @@ export const INITIAL_PRODUCTS = [
       'wh2-prod': 0,
       'wh1-staging': 0,
       'wh1-cold': 0,
+      'wh2-silo': 0,
       'virtual-scrap': 0
     },
     barcode: '8901230490027',
@@ -83,6 +87,7 @@ export const INITIAL_PRODUCTS = [
       'wh2-prod': 300,
       'wh1-staging': 0,
       'wh1-cold': 0,
+      'wh2-silo': 0,
       'virtual-scrap': 0
     },
     barcode: '8901230490034',
@@ -99,16 +104,17 @@ export const INITIAL_PRODUCTS = [
     uom: 'liters',
     costPrice: 310,
     sellingPrice: 450,
-    totalStock: 12, // Critical Low
+    totalStock: 80, // Motor Oil: 80 L (Cost ₹310) as required
     minStock: 30,
     dailyDemand: 3.2,
     leadTimeDays: 4,
     safetyStock: 12,
     locations: {
-      'wh1-store': 12,
+      'wh1-store': 80,
       'wh2-prod': 0,
       'wh1-staging': 0,
       'wh1-cold': 0,
+      'wh2-silo': 0,
       'virtual-scrap': 0
     },
     barcode: '8901230490041',
@@ -136,6 +142,7 @@ export const INITIAL_PRODUCTS = [
       'wh2-prod': 0,
       'wh1-staging': 14,
       'wh1-cold': 0,
+      'wh2-silo': 0,
       'virtual-scrap': 0
     },
     barcode: '8901230490058',
@@ -152,7 +159,7 @@ export const INITIAL_PRODUCTS = [
     uom: 'units',
     costPrice: 410,
     sellingPrice: 750,
-    totalStock: 8, // Critical Low
+    totalStock: 8, // Deliberately low stock on first load (8 units vs minStock 25)
     minStock: 25,
     dailyDemand: 3.8,
     leadTimeDays: 4,
@@ -162,6 +169,7 @@ export const INITIAL_PRODUCTS = [
       'wh2-prod': 0,
       'wh1-staging': 0,
       'wh1-cold': 0,
+      'wh2-silo': 0,
       'virtual-scrap': 0
     },
     barcode: '8901230491024',
@@ -188,6 +196,7 @@ export const INITIAL_PRODUCTS = [
       'wh2-prod': 0,
       'wh1-staging': 0,
       'wh1-cold': 0,
+      'wh2-silo': 0,
       'virtual-scrap': 0
     },
     barcode: '8901230490072',
@@ -214,6 +223,7 @@ export const INITIAL_PRODUCTS = [
       'wh2-prod': 0,
       'wh1-staging': 22,
       'wh1-cold': 0,
+      'wh2-silo': 0,
       'virtual-scrap': 0
     },
     barcode: '8901230490089',
@@ -231,7 +241,7 @@ export const INITIAL_PRODUCTS = [
     uom: 'packs',
     costPrice: 45,
     sellingPrice: 70,
-    totalStock: 120,
+    totalStock: 120, // 120 packs, Batch B-102, 7 days expiry
     minStock: 40,
     dailyDemand: 12.0,
     leadTimeDays: 2,
@@ -241,6 +251,7 @@ export const INITIAL_PRODUCTS = [
       'wh2-prod': 0,
       'wh1-staging': 0,
       'wh1-cold': 120,
+      'wh2-silo': 0,
       'virtual-scrap': 0
     },
     barcode: '8901230490096',
@@ -259,7 +270,7 @@ export const INITIAL_PRODUCTS = [
     uom: 'bottles',
     costPrice: 85,
     sellingPrice: 140,
-    totalStock: 90,
+    totalStock: 90, // 90 bottles, Batch B-088, 14 days expiry
     minStock: 35,
     dailyDemand: 6.5,
     leadTimeDays: 3,
@@ -269,6 +280,7 @@ export const INITIAL_PRODUCTS = [
       'wh2-prod': 0,
       'wh1-staging': 0,
       'wh1-cold': 90,
+      'wh2-silo': 0,
       'virtual-scrap': 0
     },
     barcode: '8901230490102',
@@ -288,22 +300,22 @@ export const INITIAL_OPERATIONS = [
     type: 'receipt',
     partner: 'Tata Steel Ltd',
     sourceLocation: 'Vendors (Virtual)',
-    destLocation: 'WH1: Central Store',
+    destLocation: 'WH1: Main Store Rack A/B',
     sku: 'RAW-STL-001',
     productName: 'Steel Rods',
     quantity: 100,
     uom: 'kg',
-    status: 'done',
+    status: 'ready',
     timestamp: '2026-09-26 07:15',
     subLocation: 'Bay-02 Inbound',
-    notes: 'PO-2601 delivery from Tata Jamshedpur depot'
+    notes: 'PO-2601 delivery from Tata Jamshedpur depot (Step 1 of Odoo Walkthrough)'
   },
   {
     id: 'op-2',
     ref: 'WH/INT/2026/0108',
     type: 'transfer',
     partner: 'Internal Route',
-    sourceLocation: 'WH1: Central Store',
+    sourceLocation: 'WH1: Main Store Rack A/B',
     destLocation: 'WH2: Production Floor',
     sku: 'RAW-STL-001',
     productName: 'Steel Rods',
@@ -311,24 +323,24 @@ export const INITIAL_OPERATIONS = [
     uom: 'kg',
     status: 'ready',
     timestamp: '2026-09-26 08:30',
-    subLocation: 'Rack A → Rack B',
-    notes: 'Requisition for CNC machining run #104'
+    subLocation: 'Rack A → Floor Silo',
+    notes: 'Requisition for CNC machining run #104 (Step 2 of Odoo Walkthrough)'
   },
   {
     id: 'op-3',
     ref: 'WH/OUT/2026/0291',
     type: 'delivery',
     partner: 'Bharat Infra Ltd',
-    sourceLocation: 'WH1: Staging Bay A03',
+    sourceLocation: 'WH2: Production Floor',
     destLocation: 'Bharat Infra (Customer)',
-    sku: 'FURN-CHR-010',
-    productName: 'Ergonomic Office Chair',
-    quantity: 10,
-    uom: 'units',
+    sku: 'RAW-STL-001',
+    productName: 'Steel Rods',
+    quantity: 20,
+    uom: 'kg',
     status: 'ready',
     timestamp: '2026-09-26 08:45',
-    subLocation: 'Staging Bay A03',
-    notes: 'Sales Order SO-9941. Picked & Packed for courier pickup'
+    subLocation: 'Outbound Bay 01',
+    notes: 'Sales Order SO-9941 dispatched to client site (Step 3 of Odoo Walkthrough)'
   },
   {
     id: 'op-4',
@@ -341,10 +353,10 @@ export const INITIAL_OPERATIONS = [
     productName: 'Steel Rods',
     quantity: 3,
     uom: 'kg',
-    status: 'done',
+    status: 'ready',
     timestamp: '2026-09-26 09:00',
     subLocation: 'Handling Damage',
-    notes: 'Bent during automated lathe chucking. Disposed to scrap'
+    notes: 'Bent during automated lathe chucking. Disposed to scrap (Step 4 of Odoo Walkthrough)'
   },
   {
     id: 'op-5',
@@ -352,7 +364,7 @@ export const INITIAL_OPERATIONS = [
     type: 'receipt',
     partner: 'Omron Precision Tech Ltd',
     sourceLocation: 'Vendors (Virtual)',
-    destLocation: 'WH1: Central Store',
+    destLocation: 'WH1: Main Store Rack A/B',
     sku: 'ELEC-MOU-001',
     productName: 'Wireless Optical Mouse',
     quantity: 50,
@@ -367,7 +379,7 @@ export const INITIAL_OPERATIONS = [
     ref: 'WH/OUT/2026/0292',
     type: 'delivery',
     partner: 'Apex Workspaces Pvt Ltd',
-    sourceLocation: 'WH1: Central Store',
+    sourceLocation: 'WH1: Main Store Rack A/B',
     destLocation: 'Apex Workspaces (Customer)',
     sku: 'ELEC-CAB-002',
     productName: 'Fast-Charging USB-C Cable',
@@ -383,58 +395,58 @@ export const INITIAL_OPERATIONS = [
 export const INITIAL_LEDGER = [
   {
     id: 'led-1',
-    ref: 'WH/IN/2026/0042',
-    timestamp: '2026-09-26 07:15',
-    productName: 'Steel Rods',
-    sku: 'RAW-STL-001',
+    ref: 'WH/IN/2026/0038',
+    timestamp: '2026-09-25 10:15',
+    productName: 'High-Grade Motor Oil',
+    sku: 'RAW-OIL-004',
     from: 'Vendors (Virtual)',
-    to: 'WH1: Central Store',
-    quantity: 100,
-    uom: 'kg',
-    costValue: 6500,
+    to: 'WH1: Main Store Rack A/B',
+    quantity: 80,
+    uom: 'liters',
+    costValue: 24800,
     type: 'receipt',
     status: 'Done'
   },
   {
     id: 'led-2',
-    ref: 'WH/ADJ/2026/0014',
-    timestamp: '2026-09-26 09:00',
-    productName: 'Steel Rods',
-    sku: 'RAW-STL-001',
-    from: 'WH2: Production Floor',
-    to: 'Virtual Scrap & Damaged',
-    quantity: 3,
-    uom: 'kg',
-    costValue: 195,
-    type: 'adjustment',
-    status: 'Done'
-  },
-  {
-    id: 'led-3',
     ref: 'WH/IN/2026/0040',
     timestamp: '2026-09-25 16:30',
     productName: 'Ergonomic Office Chair',
     sku: 'FURN-CHR-010',
     from: 'Vendors (Virtual)',
-    to: 'WH1: Staging Bay A03',
-    quantity: 24,
+    to: 'WH1: Staging Area',
+    quantity: 14,
     uom: 'units',
-    costValue: 84000,
+    costValue: 49000,
     type: 'receipt',
     status: 'Done'
   },
   {
-    id: 'led-4',
+    id: 'led-3',
     ref: 'WH/INT/2026/0101',
     timestamp: '2026-09-25 14:10',
     productName: 'Industrial Screws M8',
     sku: 'RAW-SCR-003',
-    from: 'WH1: Central Store',
+    from: 'WH1: Main Store Rack A/B',
     to: 'WH2: Production Floor',
     quantity: 300,
     uom: 'units',
     costValue: 600,
     type: 'transfer',
+    status: 'Done'
+  },
+  {
+    id: 'led-4',
+    ref: 'WH/ADJ/2026/0009',
+    timestamp: '2026-09-25 17:00',
+    productName: 'Fast-Charging USB-C Cable',
+    sku: 'ELEC-CAB-002',
+    from: 'WH1: Main Store Rack A/B',
+    to: 'Virtual Scrap & Damaged',
+    quantity: -2,
+    uom: 'units',
+    costValue: 240,
+    type: 'adjustment',
     status: 'Done'
   }
 ];

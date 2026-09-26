@@ -20,8 +20,13 @@ import SlipModal from './components/Modals/SlipModal';
 import BarcodeScannerModal from './components/Modals/BarcodeScannerModal';
 import AuthModal from './components/Modals/AuthModal';
 
+import { CheckCircle2, AlertCircle } from 'lucide-react';
+
 function AppContent() {
   const { currentView, toast } = useInventory();
+
+  // Mobile drawer state
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Modal visibility states
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
@@ -48,6 +53,9 @@ function AppContent() {
       <Header
         onOpenScanModal={() => setIsBarcodeModalOpen(true)}
         onOpenNewProductModal={() => setIsProductModalOpen(true)}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        mobileSidebarOpen={mobileSidebarOpen}
+        setMobileSidebarOpen={setMobileSidebarOpen}
       />
 
       {/* 2. Operations & Topology Sidebar */}
@@ -55,11 +63,13 @@ function AppContent() {
         onOpenReceiptModal={() => setIsReceiptModalOpen(true)}
         onOpenTransferModal={() => setIsTransferModalOpen(true)}
         onOpenAdjustmentModal={() => setIsAdjustmentModalOpen(true)}
+        mobileSidebarOpen={mobileSidebarOpen}
+        setMobileSidebarOpen={setMobileSidebarOpen}
       />
 
       {/* 3. Main Workspace Router View */}
-      <div className="pl-60">
-        <main className="w-full pt-[124px] px-8 pb-12 bg-surface min-h-screen">
+      <div className="md:pl-60 pl-0 transition-all duration-200">
+        <main className="w-full pt-[124px] px-4 sm:px-8 pb-12 bg-surface min-h-screen">
           {currentView === 'dashboard' && (
             <DashboardView
               onOpenReceiptModal={() => setIsReceiptModalOpen(true)}
@@ -149,19 +159,20 @@ function AppContent() {
 
       {/* 5. Floating Interactive Toast Notification Container */}
       <div
-        className={`fixed bottom-6 right-6 z-50 transform transition-all duration-300 pointer-events-none flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-xl text-xs font-semibold ${
-          toast.show ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
+        id="toast-container"
+        className={`fixed bottom-6 right-6 z-50 transform transition-all duration-300 pointer-events-none flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold border ${
+          toast.show ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-16 opacity-0 scale-95'
         } ${
           toast.type === 'error'
-            ? 'bg-error text-on-error'
-            : 'bg-inverse-surface text-inverse-on-surface'
+            ? 'bg-rose-950 text-rose-200 border-rose-800'
+            : 'bg-navy-card text-white border-primary/40 shadow-purple-glow'
         }`}
       >
-        <span className={`material-symbols-outlined text-[20px] ${
-          toast.type === 'error' ? 'text-on-error' : 'text-tertiary-fixed'
-        }`}>
-          {toast.type === 'error' ? 'error' : 'check_circle'}
-        </span>
+        {toast.type === 'error' ? (
+          <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
+        ) : (
+          <CheckCircle2 className="w-5 h-5 text-tertiary shrink-0" />
+        )}
         <span>{toast.message}</span>
       </div>
     </div>

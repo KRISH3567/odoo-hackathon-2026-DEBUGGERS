@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useInventory } from '../../context/InventoryContext';
+import { PackagePlus, X } from 'lucide-react';
 
 export default function NewProductModal({ isOpen, onClose }) {
-  const { createProduct } = useInventory();
+  const { createProduct, triggerToast } = useInventory();
 
   const [name, setName] = useState('');
   const [sku, setSku] = useState('');
@@ -20,17 +21,21 @@ export default function NewProductModal({ isOpen, onClose }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name || !sku) return;
+    if (!name.trim() || !sku.trim()) {
+      triggerToast('Product name and SKU are required', 'error');
+      return;
+    }
+
     createProduct({
       name,
-      sku: sku.toUpperCase(),
+      sku: sku.toUpperCase().trim(),
       category,
       uom,
       costPrice: Number(costPrice),
       sellingPrice: Number(sellingPrice),
       initialStock: Number(initialStock),
       minStock: Number(minStock),
-      supplier: supplier || 'Global Vendor',
+      supplier: supplier || 'Standard Supplier',
       isPerishable,
       expDays: isPerishable ? Number(expDays) : undefined
     });
@@ -38,11 +43,13 @@ export default function NewProductModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs">
       <div className="w-full max-w-xl rounded-2xl bg-surface-container-lowest p-6 shadow-2xl border border-surface-container flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between pb-3 border-b border-surface-container">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[24px] text-primary">add_box</span>
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-primary-container/20 text-primary border border-primary/20">
+              <PackagePlus className="w-5 h-5" />
+            </div>
             <div>
               <h3 className="font-headline text-lg font-bold text-on-surface">Create New Product SKU</h3>
               <p className="text-xs text-secondary font-mono">Catalog Master Record &amp; Multi-Location Allocation</p>
@@ -52,7 +59,7 @@ export default function NewProductModal({ isOpen, onClose }) {
             onClick={onClose}
             className="p-1 rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition-colors"
           >
-            <span className="material-symbols-outlined text-[20px]">close</span>
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -71,7 +78,7 @@ export default function NewProductModal({ isOpen, onClose }) {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-on-surface mb-1 block">SKU / Internal Reference</label>
+              <label className="text-xs font-bold text-on-surface mb-1 block">SKU / Code</label>
               <input
                 type="text"
                 required
@@ -89,7 +96,7 @@ export default function NewProductModal({ isOpen, onClose }) {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary"
+                className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary font-medium"
               >
                 <option value="Raw Materials">Raw Materials</option>
                 <option value="Finished Goods">Finished Goods</option>
@@ -105,12 +112,12 @@ export default function NewProductModal({ isOpen, onClose }) {
               <select
                 value={uom}
                 onChange={(e) => setUom(e.target.value)}
-                className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary"
+                className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary font-medium"
               >
                 <option value="units">units (Individual items)</option>
                 <option value="kg">kg (Kilograms)</option>
                 <option value="sq.m">sq.m (Square meters)</option>
-                <option value="liters">liters (Liquid capacity)</option>
+                <option value="liters">liters (Liquid volume)</option>
                 <option value="packs">packs (Multi-packs)</option>
                 <option value="bottles">bottles</option>
               </select>
@@ -147,21 +154,21 @@ export default function NewProductModal({ isOpen, onClose }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-bold text-on-surface mb-1 block">Initial On-Hand Stock</label>
+              <label className="text-xs font-bold text-on-surface mb-1 block">Initial Stock in WH1</label>
               <input
                 type="number"
                 min="0"
                 value={initialStock}
                 onChange={(e) => setInitialStock(e.target.value)}
-                className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary font-mono"
+                className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary font-mono font-bold"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-on-surface mb-1 block">Safety Stock Threshold (ROP)</label>
+              <label className="text-xs font-bold text-on-surface mb-1 block">Safety / Min Stock (ROP)</label>
               <input
                 type="number"
-                min="1"
+                min="0"
                 value={minStock}
                 onChange={(e) => setMinStock(e.target.value)}
                 className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary font-mono"
@@ -170,12 +177,12 @@ export default function NewProductModal({ isOpen, onClose }) {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-on-surface mb-1 block">Primary Vendor / Supplier</label>
+            <label className="text-xs font-bold text-on-surface mb-1 block">Default Supplier</label>
             <input
               type="text"
               value={supplier}
               onChange={(e) => setSupplier(e.target.value)}
-              placeholder="e.g. Bosch Industries Ltd"
+              placeholder="e.g. Tata Steel Ltd, Castrol India"
               className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
@@ -185,24 +192,25 @@ export default function NewProductModal({ isOpen, onClose }) {
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
-                id="isPerishableCheck"
+                id="isPerishCheck"
                 checked={isPerishable}
                 onChange={(e) => setIsPerishable(e.target.checked)}
-                className="accent-primary rounded cursor-pointer"
+                className="rounded accent-primary w-4 h-4 cursor-pointer"
               />
-              <label htmlFor="isPerishableCheck" className="text-xs font-bold text-on-surface cursor-pointer">
-                Track FEFO Batch Expiry (Perishable Product)
+              <label htmlFor="isPerishCheck" className="text-xs font-bold text-on-surface cursor-pointer">
+                Perishable Good (Enforce FEFO Expiry Routing)
               </label>
             </div>
+
             {isPerishable && (
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs text-secondary">Shelf Expiration (Days):</span>
+              <div className="pl-6 pt-1 flex items-center gap-3">
+                <label className="text-xs text-secondary">Shelf Life (Days):</label>
                 <input
                   type="number"
                   min="1"
                   value={expDays}
                   onChange={(e) => setExpDays(e.target.value)}
-                  className="w-24 h-8 px-2 rounded bg-surface-container-lowest text-xs text-on-surface border border-surface-container font-mono font-bold"
+                  className="w-24 h-8 px-2.5 rounded-lg bg-surface-container text-xs text-on-surface font-mono border border-surface-container outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
             )}
@@ -218,9 +226,9 @@ export default function NewProductModal({ isOpen, onClose }) {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg bg-primary-container text-on-primary text-xs font-bold hover:bg-primary shadow-sm transition-all"
+              className="px-4 py-2 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-hover shadow-purple-glow transition-all"
             >
-              Save Product &amp; Add to Catalog
+              Register SKU &amp; Init Stock
             </button>
           </div>
         </form>

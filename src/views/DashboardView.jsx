@@ -5,6 +5,7 @@ import FlowMap from '../components/FlowMap';
 import OperationsTable from '../components/OperationsTable';
 import RightColumnIntelligence from '../components/RightColumnIntelligence';
 import { useInventory } from '../context/InventoryContext';
+import { Layers, Warehouse, Cpu, Truck, Trash2 } from 'lucide-react';
 
 export default function DashboardView({
   onOpenReceiptModal,
@@ -29,7 +30,7 @@ export default function DashboardView({
         onOpenAdjustmentModal={onOpenAdjustmentModal}
       />
 
-      {/* 2. Top 5 Executive KPI Metric Cards */}
+      {/* 2. Top 5 Executive KPI Metric Cards with Animated Counter */}
       <KpiCards />
 
       {/* 3. Main Split Layout (68% Left | 32% Right) */}
@@ -43,48 +44,58 @@ export default function DashboardView({
           <OperationsTable onOpenSlipModal={onOpenSlipModal} />
 
           {/* Multi-Location Breakdown Quick Matrix */}
-          <section className="p-4 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-3 border border-surface-container">
+          <section className="p-4 rounded-xl bg-surface-container-lowest shadow-card-depth flex flex-col gap-3 border border-surface-container">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[20px] text-secondary">layers</span>
+                <div className="p-1 rounded-lg bg-surface-container text-secondary">
+                  <Layers className="w-4 h-4 text-primary-light" />
+                </div>
                 <h4 className="font-headline text-sm font-bold text-on-surface">
-                  Multi-Location Breakdown Snapshot
+                  Multi-Location Physical Matrix
                 </h4>
               </div>
-              <span className="font-mono text-xs text-secondary">4 Managed Locations</span>
+              <span className="font-mono text-xs text-secondary">4 Managed Physical &amp; Virtual Nodes</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
               <div className="p-3 rounded-xl bg-surface-container-low flex flex-col border border-surface-container">
-                <span className="font-mono text-[10px] text-secondary font-bold uppercase">WH1: Main Store</span>
-                <span className="font-mono text-base font-bold text-on-surface mt-1">
+                <span className="font-mono text-[10px] text-secondary font-bold uppercase flex items-center gap-1">
+                  <Warehouse className="w-3 h-3 text-primary-light" /> WH1: Main Store
+                </span>
+                <span className="font-mono text-base font-bold text-on-surface mt-1.5">
                   {wh1StoreTotal.toLocaleString()} Units
                 </span>
-                <span className="font-mono text-[11px] text-tertiary font-semibold">Rack A / Rack B</span>
+                <span className="font-mono text-[11px] text-tertiary font-semibold mt-0.5">Rack A / Rack B</span>
               </div>
 
               <div className="p-3 rounded-xl bg-surface-container-low flex flex-col border border-surface-container">
-                <span className="font-mono text-[10px] text-secondary font-bold uppercase">WH2: Production Floor</span>
-                <span className="font-mono text-base font-bold text-on-surface mt-1">
+                <span className="font-mono text-[10px] text-secondary font-bold uppercase flex items-center gap-1">
+                  <Cpu className="w-3 h-3 text-secondary" /> WH2: Production
+                </span>
+                <span className="font-mono text-base font-bold text-on-surface mt-1.5">
                   {wh2ProdTotal.toLocaleString()} Units
                 </span>
-                <span className="font-mono text-[11px] text-secondary font-semibold">Silo &amp; Active Racks</span>
+                <span className="font-mono text-[11px] text-secondary font-semibold mt-0.5">Silo &amp; Active Racks</span>
               </div>
 
               <div className="p-3 rounded-xl bg-surface-container-low flex flex-col border border-surface-container">
-                <span className="font-mono text-[10px] text-secondary font-bold uppercase">Staging Bay A03</span>
-                <span className="font-mono text-base font-bold text-on-surface mt-1">
+                <span className="font-mono text-[10px] text-secondary font-bold uppercase flex items-center gap-1">
+                  <Truck className="w-3 h-3 text-primary-light" /> Staging Area
+                </span>
+                <span className="font-mono text-base font-bold text-on-surface mt-1.5">
                   {stagingTotal.toLocaleString()} Units
                 </span>
-                <span className="font-mono text-[11px] text-primary font-semibold">Pre-Dispatch Ready</span>
+                <span className="font-mono text-[11px] text-primary-light font-semibold mt-0.5">Bay A03 Ready</span>
               </div>
 
-              <div className="p-3 rounded-xl bg-surface-container-low flex flex-col border border-surface-container">
-                <span className="font-mono text-[10px] text-secondary font-bold uppercase">Virtual Scrap / Damage</span>
-                <span className="font-mono text-base font-bold text-error mt-1">
+              <div className="p-3 rounded-xl bg-error-container/15 flex flex-col border border-error-container/30">
+                <span className="font-mono text-[10px] text-error font-bold uppercase flex items-center gap-1">
+                  <Trash2 className="w-3 h-3 text-error" /> Virtual Scrap
+                </span>
+                <span className="font-mono text-base font-bold text-error mt-1.5">
                   {scrapTotal.toLocaleString()} Units
                 </span>
-                <span className="font-mono text-[11px] text-error font-semibold">Audit Disposed</span>
+                <span className="font-mono text-[11px] text-error font-semibold mt-0.5">Audit Disposed</span>
               </div>
             </div>
           </section>

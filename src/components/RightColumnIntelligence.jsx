@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
+import {
+  BrainCircuit,
+  Zap,
+  ScanLine,
+  QrCode,
+  Hourglass,
+  BadgePercent,
+  BarChart3,
+  AlertTriangle
+} from 'lucide-react';
 
 export default function RightColumnIntelligence() {
   const {
@@ -37,25 +47,27 @@ export default function RightColumnIntelligence() {
   const handleCustomScan = (e) => {
     e.preventDefault();
     if (!customScanCode.trim()) return;
-    handleScanPreset(customScanCode, 'Custom scan');
+    handleScanPreset(customScanCode);
     setCustomScanCode('');
   };
 
   return (
     <div className="flex flex-col gap-5">
       {/* INNOVATION 4.3: Predictive Reorder Engine & AI Stress-Test */}
-      <section className="p-4 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-3 border border-surface-container">
+      <section className="p-4 rounded-xl bg-surface-container-lowest shadow-card-depth flex flex-col gap-3 border border-surface-container">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[20px] text-primary">psychology</span>
+            <div className="p-1 rounded-lg bg-primary-container/20 text-primary border border-primary/20">
+              <BrainCircuit className="w-4 h-4" />
+            </div>
             <h3 className="font-headline text-sm font-bold text-on-surface">Predictive Reorder Engine</h3>
           </div>
-          <span className="px-2 py-0.5 rounded bg-primary-container text-on-primary font-mono text-[10px] font-bold">
+          <span className="px-2 py-0.5 rounded bg-primary-container text-on-primary font-mono text-[10px] font-bold border border-primary/30">
             AI Stress-Test
           </span>
         </div>
 
-        <p className="font-mono text-[10px] text-secondary bg-surface-container-low p-2 rounded-lg border border-surface-container">
+        <p className="font-mono text-[10px] text-secondary bg-surface-container-low p-2 rounded-lg border border-surface-container leading-relaxed">
           Formula: <span className="text-on-surface font-bold">ROP = (Daily Demand × Lead Time) + Safety Stock</span>
         </p>
 
@@ -64,7 +76,7 @@ export default function RightColumnIntelligence() {
           <div>
             <div className="flex items-center justify-between text-xs font-semibold mb-1">
               <span className="text-on-surface">Demand Spike Simulation:</span>
-              <span className="font-mono font-bold text-primary">+{demandSpike}%</span>
+              <span className="font-mono font-bold text-primary-light">+{demandSpike}%</span>
             </div>
             <input
               type="range"
@@ -93,45 +105,49 @@ export default function RightColumnIntelligence() {
         </div>
 
         {/* Dynamic Critical Trigger Card */}
-        <div className="p-3 rounded-xl bg-error-container/20 flex flex-col gap-1.5 border border-error-container/40">
+        <div className="p-3 rounded-xl bg-error-container/15 flex flex-col gap-2 border border-error-container/40">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-error">Wireless Mouse (ELEC-MOU-001)</span>
-            <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-error text-on-error font-bold">
+            <span className="text-xs font-bold text-error flex items-center gap-1">
+              <AlertTriangle className="w-3.5 h-3.5" /> Wireless Mouse (ELEC-MOU-001)
+            </span>
+            <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-error text-white font-bold">
               {daysLeft} Days Left
             </span>
           </div>
-          <div className="text-xs text-on-surface leading-relaxed">
-            Dynamic ROP increased to <span className="font-bold text-error">{calculatedROP} units</span> under simulated demand. Stockout imminent within 48h!
+          <div className="text-xs text-on-surface-variant leading-relaxed">
+            Dynamic ROP expanded to <span className="font-bold text-error">{calculatedROP} units</span> under simulated stress. Stockout imminent within 48h!
           </div>
           <button
             onClick={() => generateDraftPO('ELEC-MOU-001', 50)}
-            className="mt-1 w-full py-2 px-3 rounded-lg bg-primary text-on-primary text-xs font-bold hover:bg-primary/90 flex items-center justify-center gap-1.5 shadow-sm transition-all active:scale-95"
+            className="w-full py-2 px-3 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-hover flex items-center justify-center gap-1.5 shadow-purple-glow transition-all active:scale-95"
           >
-            <span className="material-symbols-outlined text-[16px]">bolt</span>
+            <Zap className="w-4 h-4 fill-white" />
             <span>1-Click Auto-Draft PO (₹20,500)</span>
           </button>
         </div>
       </section>
 
       {/* INNOVATION 4.4: Smart Barcode & Quick-Action Scanner Simulator */}
-      <section className="p-4 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-3 relative overflow-hidden border border-surface-container">
+      <section className="p-4 rounded-xl bg-surface-container-lowest shadow-card-depth flex flex-col gap-3 relative overflow-hidden border border-surface-container">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[20px] text-tertiary">barcode_scanner</span>
-            <h3 className="font-headline text-sm font-bold text-on-surface">Smart Barcode Simulator</h3>
+            <div className="p-1 rounded-lg bg-tertiary-container/30 text-tertiary border border-tertiary/20">
+              <ScanLine className="w-4 h-4" />
+            </div>
+            <h3 className="font-headline text-sm font-bold text-on-surface">Handheld Scanner Terminal</h3>
           </div>
           <span className="flex items-center gap-1 font-mono text-[10px] text-tertiary font-bold">
-            <span className="w-2 h-2 rounded-full bg-tertiary-container animate-ping"></span> Laser Active
+            <span className="w-2 h-2 rounded-full bg-tertiary animate-ping"></span> Laser Active
           </span>
         </div>
 
         {/* Scanner Simulation Box with Animated Beam */}
-        <div className="relative h-24 bg-inverse-surface text-inverse-on-surface rounded-xl flex flex-col items-center justify-center overflow-hidden p-2 shadow-inner">
+        <div className="relative h-24 bg-surface-container-lowest text-on-surface rounded-xl flex flex-col items-center justify-center overflow-hidden p-2 border border-surface-container shadow-inner">
           <div
-            className="absolute left-0 right-0 h-0.5 bg-red-500 shadow-[0_0_10px_#ff0000] animate-scan-beam"
+            className="absolute left-0 right-0 h-0.5 bg-red-500 shadow-[0_0_12px_#ff0000] animate-scan-beam"
           ></div>
-          <span className="material-symbols-outlined text-[32px] text-surface-variant opacity-60">qr_code_scanner</span>
-          <span className={`font-mono text-[11px] mt-1 transition-colors ${isLaserSuccess ? 'text-tertiary-fixed font-bold' : 'text-surface-container-highest'}`}>
+          <QrCode className="w-7 h-7 text-secondary/40 mb-1" />
+          <span className={`font-mono text-[11px] transition-colors ${isLaserSuccess ? 'text-tertiary font-bold' : 'text-secondary'}`}>
             {scannerStatus}
           </span>
         </div>
@@ -143,11 +159,11 @@ export default function RightColumnIntelligence() {
             value={customScanCode}
             onChange={(e) => setCustomScanCode(e.target.value)}
             placeholder="Type barcode or SKU..."
-            className="flex-1 h-8 px-2.5 bg-surface-container-low text-xs rounded-lg outline-none focus:ring-1 focus:ring-primary font-mono"
+            className="flex-1 h-8 px-2.5 bg-surface-container-low text-xs rounded-lg outline-none focus:ring-1 focus:ring-primary font-mono border border-surface-container text-on-surface"
           />
           <button
             type="submit"
-            className="h-8 px-3 rounded-lg bg-primary text-on-primary text-xs font-bold hover:bg-primary-container"
+            className="h-8 px-3 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-hover transition-colors"
           >
             Scan
           </button>
@@ -156,46 +172,48 @@ export default function RightColumnIntelligence() {
         {/* Quick Scan Preset Buttons */}
         <div className="grid grid-cols-1 gap-1.5">
           <button
-            onClick={() => handleScanPreset('RAW-STL-001', 'Steel Rods verified')}
-            className="px-2.5 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-mono text-[11px] text-left flex items-center justify-between transition-colors"
+            onClick={() => handleScanPreset('RAW-STL-001')}
+            className="px-2.5 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-mono text-[11px] text-left flex items-center justify-between transition-colors border border-surface-container"
           >
             <span>Scan [RAW-STL-001]</span>
             <span className="text-tertiary font-bold">Verify SKU</span>
           </button>
 
           <button
-            onClick={() => handleScanPreset('WH/OUT/2026/0291', 'Order 0291 Dispatch')}
-            className="px-2.5 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-mono text-[11px] text-left flex items-center justify-between transition-colors"
+            onClick={() => handleScanPreset('WH/OUT/2026/0291')}
+            className="px-2.5 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-mono text-[11px] text-left flex items-center justify-between transition-colors border border-surface-container"
           >
             <span>Quick Pick [Order 0291]</span>
-            <span className="text-primary font-bold">Auto-Pick</span>
+            <span className="text-primary-light font-bold">Auto-Pick</span>
           </button>
 
           <button
-            onClick={() => handleScanPreset('LOC-RACK-A04', 'Bin Rack-A04 Checked')}
-            className="px-2.5 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-mono text-[11px] text-left flex items-center justify-between transition-colors"
+            onClick={() => handleScanPreset('WH1: Main Store Rack A/B')}
+            className="px-2.5 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-mono text-[11px] text-left flex items-center justify-between transition-colors border border-surface-container"
           >
-            <span>Bin Check [Rack-A04]</span>
+            <span>Bin Check [Rack A/B]</span>
             <span className="text-secondary font-bold">Locate</span>
           </button>
         </div>
 
         <div className="flex items-center justify-between pt-1">
-          <span className="font-mono text-[10px] text-secondary">Audio confirmation enabled</span>
-          <span className="px-2 py-0.5 rounded bg-tertiary/10 text-tertiary font-mono text-[10px] font-bold">
-            Synthesizer Beep On
+          <span className="font-mono text-[10px] text-secondary">Web Audio API Synth</span>
+          <span className="px-2 py-0.5 rounded bg-tertiary/10 text-tertiary font-mono text-[10px] font-bold border border-tertiary/20">
+            Audio Beep On
           </span>
         </div>
       </section>
 
       {/* INNOVATION 4.5: FEFO & Perishable Batch Expiry Intelligence */}
-      <section className="p-4 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-3 border border-surface-container">
+      <section className="p-4 rounded-xl bg-surface-container-lowest shadow-card-depth flex flex-col gap-3 border border-surface-container">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[20px] text-error">hourglass_bottom</span>
-            <h3 className="font-headline text-sm font-bold text-on-surface">FEFO Batch Expiry Intelligence</h3>
+            <div className="p-1 rounded-lg bg-error-container/30 text-error border border-error/20">
+              <Hourglass className="w-4 h-4" />
+            </div>
+            <h3 className="font-headline text-sm font-bold text-on-surface">FEFO Batch Expiry Tracker</h3>
           </div>
-          <span className="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-mono text-[10px] font-bold">
+          <span className="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-mono text-[10px] font-bold border border-surface-container">
             Perishables
           </span>
         </div>
@@ -207,9 +225,9 @@ export default function RightColumnIntelligence() {
         <div className="flex flex-col gap-2 mt-1">
           <div className="p-2.5 rounded-xl bg-surface-container-low flex flex-col gap-1 border border-surface-container">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-on-surface">Greek Yogurt Pack (GROC-YOG-001)</span>
-              <span className="px-2 py-0.5 rounded bg-error-container text-on-error-container font-mono text-[10px] font-bold">
-                Exp: 7 Days
+              <span className="text-xs font-bold text-on-surface">Greek Yogurt (GROC-YOG-001)</span>
+              <span className="px-2 py-0.5 rounded-full bg-error-container/40 text-error font-mono text-[10px] font-bold border border-error/30">
+                Exp: 7 Days Left
               </span>
             </div>
             <div className="flex items-center justify-between font-mono text-[10px] text-secondary">
@@ -220,9 +238,9 @@ export default function RightColumnIntelligence() {
 
           <div className="p-2.5 rounded-xl bg-surface-container-low flex flex-col gap-1 border border-surface-container">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-on-surface">Organic Cold Juice (GROC-JUC-002)</span>
-              <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[10px] font-bold">
-                Exp: 14 Days
+              <span className="text-xs font-bold text-on-surface">Cold Juice (GROC-JUC-002)</span>
+              <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-mono text-[10px] font-bold border border-amber-500/30">
+                Exp: 14 Days Left
               </span>
             </div>
             <div className="flex items-center justify-between font-mono text-[10px] text-secondary">
@@ -234,22 +252,24 @@ export default function RightColumnIntelligence() {
 
         <button
           onClick={() => triggerToast('Dynamic 25% Markdown broadcasted to sales & dispatch!')}
-          className="w-full py-2 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
+          className="w-full py-2 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold transition-colors flex items-center justify-center gap-1.5 border border-surface-container"
         >
-          <span className="material-symbols-outlined text-[16px]">price_change</span>
-          <span>Apply Dynamic Markdown</span>
+          <BadgePercent className="w-4 h-4 text-primary" />
+          <span>Apply Dynamic 25% Markdown</span>
         </button>
       </section>
 
       {/* INNOVATION 4.6: Shrinkage & Financial Impact Summary */}
-      <section className="p-4 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-3 border border-surface-container">
+      <section className="p-4 rounded-xl bg-surface-container-lowest shadow-card-depth flex flex-col gap-3 border border-surface-container">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[20px] text-secondary">analytics</span>
-            <h3 className="font-headline text-sm font-bold text-on-surface">Shrinkage & Financial Impact</h3>
+            <div className="p-1 rounded-lg bg-surface-container text-secondary">
+              <BarChart3 className="w-4 h-4" />
+            </div>
+            <h3 className="font-headline text-sm font-bold text-on-surface">Shrinkage &amp; Financial Impact</h3>
           </div>
-          <span className="px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-mono text-[10px] font-bold">
-            Under Target
+          <span className="px-2 py-0.5 rounded bg-tertiary-container/30 text-tertiary-fixed font-mono text-[10px] font-bold border border-tertiary/20">
+            Target Met
           </span>
         </div>
 
