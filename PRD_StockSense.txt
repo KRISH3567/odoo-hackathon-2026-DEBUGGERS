@@ -5,11 +5,9 @@ ORGANIZER / HACKATHON: Odoo x LPU Hackathon 2026 (Virtual Round)
 TEAM NAME: DEBUGGERS
 TEAM MEMBERS:
   1. Krish Sharma (Team Leader) - GitHub: @KRISH3567
-  2. Gursimarjit Singh
-  3. Siratpreet Kaur
-  4. Navya Mahajan
+  2. Siratpreet Kaur
+  3. Navya Mahajan
 DATE: September 26, 2026
-DOCUMENT VERSION: 2.0 (Full Official Odoo Alignment + Winning Innovations)
 ================================================================================
 
 1. EXECUTIVE SUMMARY & PROBLEM STATEMENT
