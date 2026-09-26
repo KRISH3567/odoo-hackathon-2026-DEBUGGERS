@@ -20,6 +20,8 @@ import QuickRestockModal from './components/Modals/QuickRestockModal';
 import SlipModal from './components/Modals/SlipModal';
 import BarcodeScannerModal from './components/Modals/BarcodeScannerModal';
 import AuthModal from './components/Modals/AuthModal';
+import VoiceAssistantModal from './components/Modals/VoiceAssistantModal';
+import BarcodeLabelsModal from './components/Modals/BarcodeLabelsModal';
 
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
@@ -39,8 +41,26 @@ function AppContent() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isQuickRestockModalOpen, setIsQuickRestockModalOpen] = useState(false);
   const [quickRestockSku, setQuickRestockSku] = useState(null);
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
+  const [isLabelsModalOpen, setIsLabelsModalOpen] = useState(false);
+  const [labelsModalSku, setLabelsModalSku] = useState('all');
 
   const [activeSlipOperation, setActiveSlipOperation] = useState(null);
+
+  // Global shortcut: press 'v' or 'V' to trigger hands-free voice terminal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+        return;
+      }
+      if (e.key === 'v' || e.key === 'V') {
+        e.preventDefault();
+        setIsVoiceModalOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleOpenSlip = (operation) => {
     setActiveSlipOperation(operation);
@@ -62,6 +82,7 @@ function AppContent() {
         onOpenScanModal={() => setIsBarcodeModalOpen(true)}
         onOpenNewProductModal={() => setIsProductModalOpen(true)}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onOpenVoiceModal={() => setIsVoiceModalOpen(true)}
         mobileSidebarOpen={mobileSidebarOpen}
         setMobileSidebarOpen={setMobileSidebarOpen}
       />
@@ -99,6 +120,10 @@ function AppContent() {
               onOpenAdjustmentModal={() => setIsAdjustmentModalOpen(true)}
               onOpenTransferModal={() => setIsTransferModalOpen(true)}
               onOpenQuickRestockModal={handleOpenQuickRestock}
+              onOpenLabelsModal={(sku) => {
+                setLabelsModalSku(sku || 'all');
+                setIsLabelsModalOpen(true);
+              }}
             />
           )}
 
@@ -117,7 +142,9 @@ function AppContent() {
           )}
 
           {currentView === 'barcode' && (
-            <BarcodeView />
+            <BarcodeView
+              onOpenVoiceModal={() => setIsVoiceModalOpen(true)}
+            />
           )}
 
           {currentView === 'reordering' && (
@@ -125,7 +152,11 @@ function AppContent() {
           )}
 
           {currentView === 'warehouse' && (
-            <WarehouseView />
+            <WarehouseView
+              onOpenReceiptModal={() => setIsReceiptModalOpen(true)}
+              onOpenTransferModal={() => setIsTransferModalOpen(true)}
+              onOpenQuickRestockModal={handleOpenQuickRestock}
+            />
           )}
         </main>
       </div>
@@ -176,6 +207,17 @@ function AppContent() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+      />
+
+      <VoiceAssistantModal
+        isOpen={isVoiceModalOpen}
+        onClose={() => setIsVoiceModalOpen(false)}
+      />
+
+      <BarcodeLabelsModal
+        isOpen={isLabelsModalOpen}
+        onClose={() => setIsLabelsModalOpen(false)}
+        initialSku={labelsModalSku}
       />
 
       {/* 5. Floating Interactive Toast Notification Container */}

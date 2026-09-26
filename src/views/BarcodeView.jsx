@@ -10,10 +10,11 @@ import {
   CheckCircle2,
   Package,
   Search,
-  UserCheck
+  UserCheck,
+  Mic
 } from 'lucide-react';
 
-export default function BarcodeView() {
+export default function BarcodeView({ onOpenVoiceModal }) {
   const {
     products,
     operations,
@@ -173,6 +174,15 @@ export default function BarcodeView() {
 
         <div className="flex items-center gap-2">
           <button
+            onClick={onOpenVoiceModal}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary-container/40 hover:bg-primary-container/60 text-xs font-bold text-primary-light border border-primary/30 transition-colors shadow-2xs group"
+            title="Hands-Free Voice Terminal (Press 'V')"
+          >
+            <Mic className="w-4 h-4 text-primary-light group-hover:scale-110 transition-transform" />
+            <span>Voice Assistant</span>
+          </button>
+
+          <button
             onClick={() => switchRole('manager')}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface border border-surface-container transition-colors"
           >
@@ -209,8 +219,16 @@ export default function BarcodeView() {
                   value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
                   placeholder="Scan barcode, SKU, or order ref (e.g. RAW-STL-001)..."
-                  className="w-full h-11 pl-11 pr-4 bg-surface-container-low text-xs rounded-xl border border-surface-container font-mono outline-none focus:ring-2 focus:ring-primary font-bold text-on-surface"
+                  className="w-full h-11 pl-11 pr-11 bg-surface-container-low text-xs rounded-xl border border-surface-container font-mono outline-none focus:ring-2 focus:ring-primary font-bold text-on-surface"
                 />
+                <button
+                  type="button"
+                  onClick={onOpenVoiceModal}
+                  className="absolute right-2 top-2 p-1.5 rounded-lg text-secondary hover:text-primary-light hover:bg-surface-container transition-colors"
+                  title="Speak warehouse command hands-free"
+                >
+                  <Mic className="w-4 h-4" />
+                </button>
               </div>
               <button
                 type="submit"

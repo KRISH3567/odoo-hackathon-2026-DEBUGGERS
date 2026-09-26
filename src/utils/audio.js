@@ -88,6 +88,21 @@ class SoundFX {
       // Ignore
     }
   }
+
+  // Native Text-To-Speech for Hands-Free Floor Operation
+  speak(text) {
+    try {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1.05;
+        utterance.pitch = 1.0;
+        window.speechSynthesis.speak(utterance);
+      }
+    } catch {
+      // Ignore
+    }
+  }
 }
 
 export const soundFX = new SoundFX();

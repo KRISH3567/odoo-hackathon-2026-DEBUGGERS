@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import confetti from 'canvas-confetti';
 import { INITIAL_PRODUCTS, INITIAL_OPERATIONS, INITIAL_LEDGER, INITIAL_LOCATIONS } from '../data/seedData';
 import { soundFX } from '../utils/audio';
+import { parseWarehouseCommand } from '../utils/nlpParser';
 
 const InventoryContext = createContext(null);
 
@@ -995,6 +996,119 @@ export function InventoryProvider({ children }) {
     return null;
   };
 
+  // Natural Language & Voice Assistant Command Handler
+  const executeVoiceCommand = (rawText) => {
+    const parsed = parseWarehouseCommand(rawText, products);
+    if (!parsed) {
+      const msg = "Sorry, could not understand warehouse command. Try: 'Receive 50 steel rods', 'Deliver 10 bearings', or 'Check stock'.";
+      soundFX.speak(msg);
+      triggerToast(msg, 'error');
+      return { success: false, message: msg };
+    }
+
+    const { intent, quantity, product, location, partner } = parsed;
+
+    if (intent === 'query') {
+      if (product) {
+        const msg = `${product.name} [${product.sku}]: Total stock is ${product.totalStock} ${product.uom}. (Store: ${product.locations?.['wh1-store'] || 0}, Plant: ${product.locations?.['wh2-prod'] || 0}).`;
+        soundFX.playSuccessChime();
+        soundFX.speak(msg);
+        triggerToast(msg);
+        return { success: true, message: msg, parsed };
+      } else {
+        const msg = `Warehouse summary: ${totalUnits} total units in stock across ${products.length} SKUs. Valuation is ₹${totalValuation.toLocaleString()}. ${lowStockCount} items critical.`;
+        soundFX.playSuccessChime();
+        soundFX.speak(msg);
+        triggerToast(msg);
+        return { success: true, message: msg, parsed };
+      }
+    }
+
+    if (!product) {
+      const msg = `Could not match a product from "${rawText}". Try specifying an item name like Steel, Bearings, Ghee, or Oil.`;
+      soundFX.playWarningBuzz();
+      soundFX.speak(msg);
+      triggerToast(msg, 'error');
+      return { success: false, message: msg, parsed };
+    }
+
+    const qty = quantity || 10;
+
+    if (intent === 'receipt') {
+      quickReceiveStock({
+        sku: product.sku,
+        quantity: qty,
+        supplier: product.supplier || 'Tata Steel Ltd',
+        destLocation: location
+      });
+      const newTotal = product.totalStock + qty;
+      const msg = `Received +${qty} ${product.uom} of ${product.name} into ${location}. Current stock is now ${newTotal} ${product.uom}.`;
+      soundFX.speak(msg);
+      return { success: true, message: msg, parsed };
+    }
+
+    if (intent === 'delivery') {
+      if (product.totalStock < qty) {
+        const msg = `Cannot dispatch ${qty} ${product.uom} of ${product.name}. Only ${product.totalStock} available in stock!`;
+        soundFX.playWarningBuzz();
+        soundFX.speak(msg);
+        triggerToast(msg, 'error');
+        return { success: false, message: msg, parsed };
+      }
+
+      const srcLoc = location.includes('WH2') ? 'WH2: Production Floor' : 'WH1: Main Store Rack A/B';
+      const op = createDelivery({
+        customer: partner,
+        sourceLocation: srcLoc,
+        sku: product.sku,
+        quantity: qty,
+        uom: product.uom,
+        autoValidate: true
+      });
+      if (op) {
+        const newTotal = product.totalStock - qty;
+        const msg = `Dispatched ${qty} ${product.uom} of ${product.name} to ${partner}. Remaining stock is ${newTotal} ${product.uom}.`;
+        soundFX.speak(msg);
+        return { success: true, message: msg, parsed };
+      }
+      return { success: false, message: 'Delivery failed', parsed };
+    }
+
+    if (intent === 'transfer') {
+      const fromLoc = location.includes('WH2') ? 'wh1-store' : 'wh2-prod';
+      const toLoc = location.includes('WH2') ? 'wh2-prod' : 'wh1-store';
+      const fromName = fromLoc === 'wh1-store' ? 'WH1 Main Store' : 'WH2 Production Floor';
+      const toName = toLoc === 'wh2-prod' ? 'WH2 Production Floor' : 'WH1 Main Store';
+
+      const ok = relocateProduct(product.sku, qty, fromLoc, toLoc);
+      if (ok) {
+        const msg = `Moved ${qty} ${product.uom} of ${product.name} from ${fromName} to ${toName}. Zero-net delta verified.`;
+        soundFX.speak(msg);
+        return { success: true, message: msg, parsed };
+      } else {
+        const msg = `Insufficient stock in ${fromName} to move ${qty} ${product.uom}.`;
+        soundFX.speak(msg);
+        return { success: false, message: msg, parsed };
+      }
+    }
+
+    if (intent === 'adjustment') {
+      createAdjustment({
+        location,
+        sku: product.sku,
+        physicalCount: qty,
+        reason: 'Hands-Free Voice Cycle Count'
+      });
+      const msg = `Physical inventory audit reconciled: ${product.name} stock set to ${qty} ${product.uom}.`;
+      soundFX.speak(msg);
+      return { success: true, message: msg, parsed };
+    }
+
+    const fallbackMsg = `Recognized ${product.name} (${product.sku}), but could not determine action. Say "Receive", "Deliver", or "Check stock".`;
+    soundFX.speak(fallbackMsg);
+    return { success: false, message: fallbackMsg, parsed };
+  };
+
   // Executive Metric Computations
   const totalUnits = products.reduce((acc, p) => acc + p.totalStock, 0);
   const totalValuation = products.reduce((acc, p) => acc + (p.totalStock * p.costPrice), 0);
@@ -1037,6 +1151,7 @@ export function InventoryProvider({ children }) {
         deleteProduct,
         generateDraftPO,
         simulateBarcodeScan,
+        executeVoiceCommand,
         isLiveStreamActive,
         setIsLiveStreamActive,
         simulateLiveEvent,

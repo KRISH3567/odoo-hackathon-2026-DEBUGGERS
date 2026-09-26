@@ -11,8 +11,13 @@ import {
   Factory,
   Boxes
 } from 'lucide-react';
+import WarehouseDigitalTwin from '../components/WarehouseDigitalTwin';
 
-export default function WarehouseView() {
+export default function WarehouseView({
+  onOpenReceiptModal,
+  onOpenTransferModal,
+  onOpenQuickRestockModal
+}) {
   const { products } = useInventory();
 
   // Compute total items per location
@@ -45,6 +50,13 @@ export default function WarehouseView() {
           </p>
         </div>
       </div>
+
+      {/* 1. Tactical Digital Twin Interactive Floorplan Map */}
+      <WarehouseDigitalTwin
+        onOpenReceiptModal={onOpenReceiptModal}
+        onOpenTransferModal={onOpenTransferModal}
+        onOpenQuickRestockModal={onOpenQuickRestockModal}
+      />
 
       {/* WH1 Central Warehouse Facility Card */}
       <div className="p-6 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-card-depth flex flex-col gap-4">
