@@ -11,22 +11,16 @@ import {
   Boxes,
   PlusCircle,
   Eye,
-  X,
-  Warehouse,
-  Barcode
+  X
 } from 'lucide-react';
 
 export default function ProductsView({
   onOpenNewProductModal,
-  onOpenReceiptModal,
   onOpenAdjustmentModal,
-  onOpenTransferModal,
   onOpenQuickRestockModal
 }) {
   const {
     products,
-    totalValuation,
-    lowStockCount,
     triggerToast
   } = useInventory();
 
@@ -219,7 +213,6 @@ export default function ProductsView({
                 </tr>
               ) : (
                 filteredProducts.map(p => {
-                  const isLow = p.totalStock <= p.minStock;
                   const storeQty = (p.locations && p.locations['wh1-store']) || 0;
                   const prodQty = (p.locations && p.locations['wh2-prod']) || 0;
 

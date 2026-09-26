@@ -4,7 +4,6 @@ import AnimatedCounter from './AnimatedCounter';
 import {
   Package,
   AlertTriangle,
-  ArrowDownLeft,
   Truck,
   TrendingUp,
   Boxes

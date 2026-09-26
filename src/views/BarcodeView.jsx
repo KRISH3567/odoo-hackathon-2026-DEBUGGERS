@@ -2,19 +2,13 @@ import React, { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
 import {
   ScanLine,
-  QrCode,
   History,
-  Volume2,
   ChevronRight,
-  ClipboardList,
   ArrowDownLeft,
   Truck,
   ArrowLeftRight,
   CheckCircle2,
   Package,
-  Plus,
-  Minus,
-  Sparkles,
   Search,
   UserCheck
 } from 'lucide-react';

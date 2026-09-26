@@ -3,6 +3,7 @@ import { useInventory } from '../context/InventoryContext';
 import {
   Warehouse,
   Search,
+  ScanLine,
   Plus,
   Bell,
   ArrowLeftRight,
@@ -118,6 +119,16 @@ export default function Header({
             className="h-9 w-48 xl:w-64 pl-8 pr-3 bg-surface-container-low text-on-surface placeholder:text-secondary text-xs rounded-lg border border-surface-container outline-none focus:ring-1 focus:ring-primary transition-all focus:w-72"
           />
         </form>
+
+        {/* Quick Scan Button */}
+        <button
+          onClick={onOpenScanModal}
+          className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-all border border-surface-container shadow-2xs active:scale-95"
+          title="Quick Optical Barcode Scanner"
+        >
+          <ScanLine className="w-4 h-4 text-tertiary" />
+          <span className="hidden sm:inline">Scan</span>
+        </button>
 
         {/* New Product Button */}
         <button

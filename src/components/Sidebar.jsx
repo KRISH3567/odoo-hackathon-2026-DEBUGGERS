@@ -9,9 +9,7 @@ import {
   ArrowDownLeft,
   Truck,
   Plus,
-  SlidersHorizontal,
-  ShieldCheck,
-  CheckCircle2
+  SlidersHorizontal
 } from 'lucide-react';
 
 export default function Sidebar({
