@@ -57,7 +57,7 @@ function AppContent() {
 
   return (
     <div className="bg-surface font-body text-body text-on-surface min-h-screen">
-      {/* 1. Dual-Tier Navigation Header */}
+      {/* 1. Header */}
       <Header
         onOpenScanModal={() => setIsBarcodeModalOpen(true)}
         onOpenNewProductModal={() => setIsProductModalOpen(true)}
@@ -66,9 +66,11 @@ function AppContent() {
         setMobileSidebarOpen={setMobileSidebarOpen}
       />
 
-      {/* 2. Operations & Topology Sidebar */}
+      {/* 2. Operations & Navigation Sidebar */}
       <Sidebar
+        onOpenNewProductModal={() => setIsProductModalOpen(true)}
         onOpenReceiptModal={() => setIsReceiptModalOpen(true)}
+        onOpenDeliveryModal={() => setIsDeliveryModalOpen(true)}
         onOpenTransferModal={() => setIsTransferModalOpen(true)}
         onOpenAdjustmentModal={() => setIsAdjustmentModalOpen(true)}
         mobileSidebarOpen={mobileSidebarOpen}
@@ -77,7 +79,7 @@ function AppContent() {
 
       {/* 3. Main Workspace Router View */}
       <div className="md:pl-60 pl-0 transition-all duration-200">
-        <main className="w-full pt-[124px] px-4 sm:px-8 pb-12 bg-surface min-h-screen">
+        <main className="w-full pt-20 px-4 sm:px-8 pb-12 bg-surface min-h-screen">
           {currentView === 'dashboard' && (
             <DashboardView
               onOpenNewProductModal={() => setIsProductModalOpen(true)}
@@ -114,12 +116,12 @@ function AppContent() {
             <StockLedgerView />
           )}
 
-          {currentView === 'reordering' && (
-            <ReorderingView />
-          )}
-
           {currentView === 'barcode' && (
             <BarcodeView />
+          )}
+
+          {currentView === 'reordering' && (
+            <ReorderingView />
           )}
 
           {currentView === 'warehouse' && (
