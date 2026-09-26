@@ -109,7 +109,13 @@ export default function OperationsView({
       </div>
 
       {/* Operations Master Table */}
-      <OperationsTable onOpenSlipModal={onOpenSlipModal} />
+      <OperationsTable
+        onOpenSlipModal={onOpenSlipModal}
+        onOpenReceiptModal={onOpenReceiptModal}
+        onOpenDeliveryModal={onOpenDeliveryModal}
+        onOpenTransferModal={onOpenTransferModal}
+        onOpenAdjustmentModal={onOpenAdjustmentModal}
+      />
     </div>
   );
 }

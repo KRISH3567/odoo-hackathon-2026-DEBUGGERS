@@ -193,7 +193,7 @@ export function InventoryProvider({ children }) {
   // OPERATIONS LIFECYCLE HANDLERS
 
   // 1. Receipts (Incoming Stock)
-  const createReceipt = ({ supplier, destLocation, sku, quantity, uom, notes }) => {
+  const createReceipt = ({ supplier, destLocation, sku, quantity, uom, notes, autoValidate = false }) => {
     const qty = Number(quantity);
     if (!qty || qty <= 0) {
       triggerToast('Receipt quantity must be greater than zero', 'error');
@@ -202,22 +202,47 @@ export function InventoryProvider({ children }) {
     }
 
     const prod = products.find(p => p.sku === sku);
+    const targetLoc = destLocation || 'WH1: Main Store Rack A/B';
     const newOp = {
       id: `op-${Date.now()}`,
       ref: `WH/IN/2026/${Math.floor(1000 + Math.random() * 9000)}`,
       type: 'receipt',
       partner: supplier || 'Tata Steel Ltd',
       sourceLocation: 'Vendors (Virtual)',
-      destLocation: destLocation || 'WH1: Main Store Rack A/B',
+      destLocation: targetLoc,
       sku,
       productName: prod ? prod.name : 'Unknown Item',
       quantity: qty,
       uom: uom || (prod ? prod.uom : 'units'),
-      status: 'ready',
+      status: autoValidate ? 'done' : 'ready',
       timestamp: new Date().toISOString().replace('T', ' ').slice(0, 16),
       subLocation: 'Inbound Receiving Dock',
       notes: notes || 'Incoming replenishment manifest'
     };
+
+    if (autoValidate) {
+      const locKey = targetLoc.includes('WH2') 
+        ? (targetLoc.includes('Silo') ? 'wh2-silo' : 'wh2-prod') 
+        : (targetLoc.includes('Staging') ? 'wh1-staging' : (targetLoc.includes('Cold') ? 'wh1-cold' : 'wh1-store'));
+      
+      updateProductStock(sku, qty, locKey);
+      addLedgerEntry({
+        ref: newOp.ref,
+        productName: newOp.productName,
+        sku: newOp.sku,
+        from: newOp.sourceLocation,
+        to: newOp.destLocation,
+        quantity: qty,
+        uom: newOp.uom,
+        costValue: (prod ? prod.costPrice : 50) * qty,
+        type: 'receipt'
+      });
+      setOperations(prev => [newOp, ...prev]);
+      soundFX.playSuccessChime();
+      triggerToast(`Receipt #${newOp.ref} confirmed! +${qty} ${newOp.uom} credited to ${targetLoc}`);
+      return newOp;
+    }
+
     setOperations(prev => [newOp, ...prev]);
     soundFX.playSuccessChime();
     triggerToast(`Receipt #${newOp.ref} generated and queued for inspection`);
@@ -257,7 +282,7 @@ export function InventoryProvider({ children }) {
   };
 
   // 2. Deliveries (Outgoing Stock)
-  const createDelivery = ({ customer, sourceLocation, sku, quantity, uom, notes }) => {
+  const createDelivery = ({ customer, sourceLocation, sku, quantity, uom, notes, autoValidate = false }) => {
     const qty = Number(quantity);
     if (!qty || qty <= 0) {
       triggerToast('Delivery quantity must be greater than zero', 'error');
@@ -272,22 +297,56 @@ export function InventoryProvider({ children }) {
       return null;
     }
 
+    const srcLoc = sourceLocation || 'WH1: Staging Area';
+    const locKey = srcLoc.includes('WH2')
+      ? (srcLoc.includes('Silo') ? 'wh2-silo' : 'wh2-prod')
+      : (srcLoc.includes('Staging') ? 'wh1-staging' : (srcLoc.includes('Cold') ? 'wh1-cold' : 'wh1-store'));
+
+    if (autoValidate) {
+      const availableInLoc = (prod?.locations && prod.locations[locKey]) || 0;
+      if (availableInLoc < qty) {
+        soundFX.playWarningBuzz();
+        triggerToast(`Insufficient stock in ${srcLoc}! Available: ${availableInLoc}, Required: ${qty}`, 'error');
+        return null;
+      }
+    }
+
     const newOp = {
       id: `op-${Date.now()}`,
       ref: `WH/OUT/2026/${Math.floor(1000 + Math.random() * 9000)}`,
       type: 'delivery',
       partner: customer || 'Bharat Infra Ltd',
-      sourceLocation: sourceLocation || 'WH2: Production Floor',
+      sourceLocation: srcLoc,
       destLocation: `${customer || 'Client'} (Customer Virtual)`,
       sku,
       productName: prod ? prod.name : 'Unknown Item',
       quantity: qty,
       uom: uom || (prod ? prod.uom : 'units'),
-      status: 'ready', // ready for pick & pack
+      status: autoValidate ? 'done' : 'ready', // ready for pick & pack or done
       timestamp: new Date().toISOString().replace('T', ' ').slice(0, 16),
       subLocation: 'Outbound Bay 01',
       notes: notes || 'Customer Sales Order Dispatch'
     };
+
+    if (autoValidate) {
+      updateProductStock(sku, -qty, locKey);
+      addLedgerEntry({
+        ref: newOp.ref,
+        productName: newOp.productName,
+        sku: newOp.sku,
+        from: newOp.sourceLocation,
+        to: newOp.destLocation,
+        quantity: -qty,
+        uom: newOp.uom,
+        costValue: (prod ? prod.sellingPrice : 100) * qty,
+        type: 'delivery'
+      });
+      setOperations(prev => [newOp, ...prev]);
+      soundFX.playSuccessChime();
+      triggerToast(`Delivery #${newOp.ref} dispatched! -${qty} ${newOp.uom} debited to ${newOp.partner}`);
+      return newOp;
+    }
+
     setOperations(prev => [newOp, ...prev]);
     soundFX.playSuccessChime();
     triggerToast(`Delivery Order #${newOp.ref} scheduled for Pick & Pack`);
@@ -482,25 +541,35 @@ export function InventoryProvider({ children }) {
 
   // Product Management CRUD
   const createProduct = (prodData) => {
+    const locKey = prodData.targetLocationKey || 'wh1-store';
+    const initStock = Math.max(0, Number(prodData.initialStock || 0));
+    const targetLocName = prodData.targetLocationName || (
+      locKey === 'wh2-prod' ? 'WH2: Production Floor' :
+      locKey === 'wh1-cold' ? 'WH1: Cold Storage Bin' :
+      locKey === 'wh1-staging' ? 'WH1: Staging Area' :
+      locKey === 'wh2-silo' ? 'WH2: Raw Material Silo' :
+      'WH1: Main Store Rack A/B'
+    );
+
     const newProd = {
       id: `prod-${Date.now()}`,
-      sku: prodData.sku.toUpperCase(),
-      name: prodData.name,
+      sku: prodData.sku.toUpperCase().trim(),
+      name: prodData.name.trim(),
       category: prodData.category || 'Raw Materials',
       uom: prodData.uom || 'units',
       costPrice: Number(prodData.costPrice || 10),
       sellingPrice: Number(prodData.sellingPrice || 15),
-      totalStock: Number(prodData.initialStock || 0),
+      totalStock: initStock,
       minStock: Number(prodData.minStock || 20),
       dailyDemand: Number(prodData.dailyDemand || 2.5),
       leadTimeDays: Number(prodData.leadTimeDays || 4),
       safetyStock: Number(prodData.safetyStock || 10),
       locations: {
-        'wh1-store': Number(prodData.initialStock || 0),
-        'wh2-prod': 0,
-        'wh1-staging': 0,
-        'wh1-cold': 0,
-        'wh2-silo': 0,
+        'wh1-store': locKey === 'wh1-store' ? initStock : 0,
+        'wh2-prod': locKey === 'wh2-prod' ? initStock : 0,
+        'wh1-staging': locKey === 'wh1-staging' ? initStock : 0,
+        'wh1-cold': locKey === 'wh1-cold' ? initStock : 0,
+        'wh2-silo': locKey === 'wh2-silo' ? initStock : 0,
         'virtual-scrap': 0
       },
       barcode: prodData.barcode || `8901230${Math.floor(100000 + Math.random() * 900000)}`,
@@ -520,7 +589,7 @@ export function InventoryProvider({ children }) {
         productName: newProd.name,
         sku: newProd.sku,
         from: 'Vendors (Virtual)',
-        to: 'WH1: Main Store Rack A/B',
+        to: targetLocName,
         quantity: newProd.totalStock,
         uom: newProd.uom,
         costValue: newProd.costPrice * newProd.totalStock,
@@ -529,8 +598,20 @@ export function InventoryProvider({ children }) {
     }
 
     soundFX.playSuccessChime();
-    triggerToast(`Product [${newProd.sku}] ${newProd.name} registered successfully`);
+    triggerToast(`Product [${newProd.sku}] ${newProd.name} registered (+${newProd.totalStock} ${newProd.uom})`);
     return newProd;
+  };
+
+  // Quick Inflow / Restock directly on any product
+  const quickReceiveStock = ({ sku, quantity, supplier, destLocation }) => {
+    return createReceipt({
+      supplier: supplier || 'Tata Steel Ltd',
+      destLocation: destLocation || 'WH1: Main Store Rack A/B',
+      sku,
+      quantity,
+      autoValidate: true,
+      notes: 'Quick Manager Inflow Restock'
+    });
   };
 
   const updateProduct = (sku, updates) => {
@@ -542,6 +623,85 @@ export function InventoryProvider({ children }) {
     setProducts(prev => prev.filter(p => p.sku !== sku));
     triggerToast(`Product [${sku}] deleted from catalog`, 'error');
   };
+
+  // LIVE REAL-WORLD SIMULATION ENGINE
+  const [isLiveStreamActive, setIsLiveStreamActive] = useState(false);
+
+  const simulateLiveEvent = (forcedType) => {
+    const type = forcedType || (Math.random() > 0.45 ? 'order' : 'receipt');
+
+    if (type === 'order') {
+      const eligibleProducts = products.filter(p => p.totalStock >= 2);
+      if (eligibleProducts.length === 0) return;
+      const prod = eligibleProducts[Math.floor(Math.random() * eligibleProducts.length)];
+      
+      const realCustomers = [
+        'Reliance Retail Ltd',
+        'Larsen & Toubro Ltd',
+        'Bharat Infra Projects',
+        'Croma Digital Express',
+        'Flipkart Fulfillment Hub',
+        'Mahindra Auto Works',
+        'Tata Motors Assembly'
+      ];
+      const customer = realCustomers[Math.floor(Math.random() * realCustomers.length)];
+      const qty = Math.min(prod.totalStock, Math.floor(1 + Math.random() * 4));
+
+      let srcLoc = 'WH1: Main Store Rack A/B';
+      if ((prod.locations?.['wh1-staging'] || 0) >= qty) srcLoc = 'WH1: Staging Area';
+      else if ((prod.locations?.['wh2-prod'] || 0) >= qty) srcLoc = 'WH2: Production Floor';
+      else if ((prod.locations?.['wh1-cold'] || 0) >= qty) srcLoc = 'WH1: Cold Storage Bin';
+
+      createDelivery({
+        customer,
+        sourceLocation: srcLoc,
+        sku: prod.sku,
+        quantity: qty,
+        uom: prod.uom,
+        autoValidate: true,
+        notes: 'Simulated Live Customer Sales Order'
+      });
+    } else {
+      const prod = products[Math.floor(Math.random() * products.length)];
+      if (!prod) return;
+
+      const realVendors = [
+        'Tata Steel Ltd',
+        'Havells India Ltd',
+        'Reliance Petrochemicals',
+        'Amul Dairy Cooperative',
+        'Jindal Steel & Power',
+        'Schneider Electric India',
+        'Castrol Lubricants'
+      ];
+      const vendor = prod.supplier && prod.supplier !== 'Standard Supplier'
+        ? prod.supplier 
+        : realVendors[Math.floor(Math.random() * realVendors.length)];
+      const qty = Math.floor(10 + Math.random() * 25);
+      const destLoc = prod.isPerishable 
+        ? 'WH1: Cold Storage Bin' 
+        : 'WH1: Main Store Rack A/B';
+
+      createReceipt({
+        supplier: vendor,
+        destLocation: destLoc,
+        sku: prod.sku,
+        quantity: qty,
+        uom: prod.uom,
+        autoValidate: true,
+        notes: 'Simulated Live Inbound Replenishment'
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!isLiveStreamActive) return;
+    const interval = setInterval(() => {
+      simulateLiveEvent();
+    }, 20000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLiveStreamActive]);
 
   // 1-Click Auto Draft PO Generator
   const generateDraftPO = (sku, qty = 50) => {
@@ -852,10 +1012,14 @@ export function InventoryProvider({ children }) {
         validateTransfer,
         createAdjustment,
         createProduct,
+        quickReceiveStock,
         updateProduct,
         deleteProduct,
         generateDraftPO,
         simulateBarcodeScan,
+        isLiveStreamActive,
+        setIsLiveStreamActive,
+        simulateLiveEvent,
         resetAllData,
         toast,
         triggerToast,

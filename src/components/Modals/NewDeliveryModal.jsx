@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useInventory } from '../../context/InventoryContext';
-import { Truck, X, AlertTriangle } from 'lucide-react';
+import { Truck, X, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
 export default function NewDeliveryModal({ isOpen, onClose }) {
   const { products, createDelivery, triggerToast } = useInventory();
@@ -10,12 +10,21 @@ export default function NewDeliveryModal({ isOpen, onClose }) {
   const [selectedSku, setSelectedSku] = useState(products[0]?.sku || 'RAW-STL-001');
   const [quantity, setQuantity] = useState(10);
   const [notes, setNotes] = useState('Sales Order SO-9941 Dispatch');
+  const [autoValidate, setAutoValidate] = useState(true);
 
   if (!isOpen) return null;
 
   const currentProduct = products.find(p => p.sku === selectedSku);
   const availableStock = currentProduct?.totalStock ?? 0;
   const isOverStock = Number(quantity) > availableStock;
+
+  const customerPresets = [
+    'Bharat Infra Ltd',
+    'Larsen & Toubro Ltd',
+    'Reliance Retail Ltd',
+    'Croma Digital Express',
+    'Mahindra Auto Works'
+  ];
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -36,7 +45,8 @@ export default function NewDeliveryModal({ isOpen, onClose }) {
       sku: selectedSku,
       quantity: qty,
       uom: currentProduct?.uom || 'units',
-      notes
+      notes,
+      autoValidate
     });
     onClose();
   };
@@ -64,15 +74,34 @@ export default function NewDeliveryModal({ isOpen, onClose }) {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div>
-            <label className="text-xs font-bold text-on-surface mb-1 block">Customer / Destination Client</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-bold text-on-surface">Customer / Destination Client</label>
+              <span className="text-[10px] text-secondary">Click to fill</span>
+            </div>
             <input
               type="text"
               required
               value={customer}
               onChange={(e) => setCustomer(e.target.value)}
-              className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary"
+              className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary mb-1.5"
               placeholder="e.g. Bharat Infra Ltd, Apex Workspaces"
             />
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {customerPresets.map(preset => (
+                <button
+                  type="button"
+                  key={preset}
+                  onClick={() => setCustomer(preset)}
+                  className={`text-[10px] px-2 py-0.5 rounded-full border transition-colors ${
+                    customer === preset
+                      ? 'bg-primary-container text-on-primary border-primary'
+                      : 'bg-surface-container text-secondary hover:text-on-surface border-surface-container'
+                  }`}
+                >
+                  {preset}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -85,6 +114,7 @@ export default function NewDeliveryModal({ isOpen, onClose }) {
               >
                 <option value="WH1: Staging Area">WH1: Staging Area (Dispatch Bay)</option>
                 <option value="WH1: Main Store Rack A/B">WH1: Main Store Rack A/B</option>
+                <option value="WH1: Cold Storage Bin">WH1: Cold Storage Bin</option>
                 <option value="WH2: Production Floor">WH2: Production Floor</option>
               </select>
             </div>
@@ -98,7 +128,7 @@ export default function NewDeliveryModal({ isOpen, onClose }) {
               >
                 {products.map(p => (
                   <option key={p.sku} value={p.sku}>
-                    [{p.sku}] {p.name} ({p.totalStock} {p.uom} avail)
+                    [{p.sku}] {p.name} (Stock: {p.totalStock})
                   </option>
                 ))}
               </select>
@@ -107,47 +137,68 @@ export default function NewDeliveryModal({ isOpen, onClose }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-bold text-on-surface">Quantity ({currentProduct?.uom || 'units'})</label>
-                <span className="font-mono text-[10px] text-secondary">Available: {availableStock}</span>
-              </div>
+              <label className="text-xs font-bold text-on-surface mb-1 block">
+                Quantity to Dispatch ({currentProduct?.uom || 'units'})
+              </label>
               <input
                 type="number"
                 min="1"
                 required
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                className={`w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border outline-none font-mono font-bold ${
-                  isOverStock ? 'border-error focus:ring-1 focus:ring-error' : 'border-surface-container focus:ring-1 focus:ring-primary'
+                className={`w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs border outline-none font-mono font-bold ${
+                  isOverStock
+                    ? 'border-error text-error focus:ring-1 focus:ring-error'
+                    : 'border-surface-container text-on-surface focus:ring-1 focus:ring-primary'
                 }`}
               />
-              {isOverStock && (
-                <span className="text-[10px] text-error flex items-center gap-1 mt-1">
-                  <AlertTriangle className="w-3 h-3" /> Exceeds available stock ({availableStock} on-hand)
-                </span>
-              )}
             </div>
 
             <div>
-              <label className="text-xs font-bold text-on-surface mb-1 block">Est. Revenue Value</label>
-              <div className="h-9 px-3 rounded-lg bg-surface-container flex items-center font-mono text-xs font-bold text-tertiary border border-surface-container">
-                ₹{((currentProduct?.sellingPrice || 0) * Number(quantity)).toLocaleString()}
-              </div>
+              <label className="text-xs font-bold text-on-surface mb-1 block">Sales Order / Dispatch Ref</label>
+              <input
+                type="text"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary"
+              />
             </div>
           </div>
 
-          <div>
-            <label className="text-xs font-bold text-on-surface mb-1 block">Dispatch Notes</label>
-            <input
-              type="text"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full h-9 px-3 rounded-lg bg-surface-container-low text-xs text-on-surface border border-surface-container outline-none focus:ring-1 focus:ring-primary"
-              placeholder="e.g. Courier tracking / Priority express handling"
-            />
+          {/* Real-Time Stock Availability Indicator */}
+          <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container flex items-center justify-between">
+            <span className="text-xs text-secondary font-mono">
+              Available Company Stock: <span className="font-bold text-on-surface">{availableStock} {currentProduct?.uom}</span>
+            </span>
+            {isOverStock ? (
+              <span className="flex items-center gap-1 font-mono text-[10px] text-error font-bold">
+                <AlertTriangle className="w-3.5 h-3.5 text-error" /> Stock Deficit!
+              </span>
+            ) : (
+              <span className="font-mono text-[10px] text-emerald-400 font-bold">
+                Sufficient Inventory
+              </span>
+            )}
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-surface-container mt-2">
+          {/* Instant Auto-Validate Dispatch */}
+          <div className="p-3 rounded-xl bg-surface-container-low border border-surface-container flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="autoValDelivery"
+                checked={autoValidate}
+                onChange={(e) => setAutoValidate(e.target.checked)}
+                className="rounded accent-primary w-4 h-4 cursor-pointer"
+              />
+              <label htmlFor="autoValDelivery" className="text-xs font-semibold text-on-surface cursor-pointer">
+                Immediate Real-World Dispatch (Auto-debit stock &amp; ledger)
+              </label>
+            </div>
+            <span className="font-mono text-[10px] text-primary-light font-bold">Instant Outflow</span>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-surface-container">
             <button
               type="button"
               onClick={onClose}
@@ -158,13 +209,14 @@ export default function NewDeliveryModal({ isOpen, onClose }) {
             <button
               type="submit"
               disabled={isOverStock}
-              className={`px-4 py-2 rounded-lg text-xs font-bold shadow-purple-glow transition-all ${
-                isOverStock 
-                  ? 'bg-surface-container-highest text-secondary cursor-not-allowed' 
-                  : 'bg-primary text-white hover:bg-primary-hover active:scale-95'
+              className={`flex items-center gap-1.5 px-5 py-2.5 rounded-xl font-headline text-xs font-bold transition-all active:scale-95 ${
+                isOverStock
+                  ? 'bg-surface-container text-secondary cursor-not-allowed'
+                  : 'bg-primary text-white hover:bg-primary-hover shadow-purple-glow'
               }`}
             >
-              Schedule Delivery Order
+              <CheckCircle2 className="w-4 h-4" />
+              <span>{autoValidate ? 'Confirm & Ship Now' : 'Schedule Pick & Pack'}</span>
             </button>
           </div>
         </form>
