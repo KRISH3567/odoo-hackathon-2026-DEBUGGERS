@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { InventoryProvider, useInventory } from './context/InventoryContext';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
