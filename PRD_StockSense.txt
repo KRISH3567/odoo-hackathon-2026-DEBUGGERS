@@ -1,0 +1,322 @@
+================================================================================
+OFFICIAL PRODUCT REQUIREMENT DOCUMENT (PRD) — WINNING SPECIFICATION
+PROJECT: STOCKSENSE (Next-Gen Modular Inventory Management System)
+ORGANIZER / HACKATHON: Odoo x LPU Hackathon 2026 (Virtual Round)
+TEAM NAME: DEBUGGERS
+TEAM MEMBERS:
+  1. Krish Sharma (Team Leader) - GitHub: @KRISH3567
+  2. Gursimarjit Singh
+  3. Siratpreet Kaur
+  4. Navya Mahajan
+DATE: September 26, 2026
+DOCUMENT VERSION: 2.0 (Full Official Odoo Alignment + Winning Innovations)
+================================================================================
+
+1. EXECUTIVE SUMMARY & PROBLEM STATEMENT
+--------------------------------------------------------------------------------
+1.1 Background & Purpose:
+Traditional micro, small, and medium businesses (MSMEs) rely heavily on manual 
+paper registers, fragmented Excel spreadsheets, and informal communication channels 
+to manage warehouse inventory. This causes frequent stockouts, untracked shrinkage, 
+delayed customer shipments, and costly discrepancies.
+
+1.2 The Goal:
+Build a modular, web-based Inventory Management System (IMS) — "StockSense" — 
+that digitizes and unifies all incoming, outgoing, internal, and adjustment stock 
+operations into an intuitive, real-time platform matching Odoo's world-class 
+double-entry inventory philosophy.
+
+1.3 Target Users & Personas:
+  - Inventory Managers: Manage vendor receipts, customer dispatch orders, stock 
+    valuations, safety stock rules, and high-level warehouse reporting.
+  - Warehouse Staff: Handle daily physical operations — barcode scanning, shelf 
+    picking, packing, internal bin transfers, and cycle counts.
+
+
+2. CORE SYSTEM ARCHITECTURE & NAVIGATION
+--------------------------------------------------------------------------------
+The application provides a persistent enterprise sidebar navigation matching 
+the official Odoo specification:
+
+  [ STOCKSENSE IMS ]
+  -------------------------------------------------------------
+  📊 1. Dashboard (Overview & Operational KPIs)
+  📦 2. Products
+        • Product Catalog (Create / Edit)
+        • Stock Availability per Location
+        • Categories & Units of Measure (UoM)
+        • Reordering Rules (Min/Max & Predictive ROP)
+  ⚡ 3. Operations
+        • Receipts (Incoming Vendor Shipments)
+        • Delivery Orders (Outgoing Customer Shipments - Pick & Pack)
+        • Internal Transfers (Location-to-Location Movements)
+        • Inventory Adjustments (Physical Count vs System Variance)
+  📜 4. Move History (Stock Ledger / Double-Entry Audit Trail)
+  🏢 5. Settings
+        • Warehouses & Locations (Main Store, Production Rack, Delivery Bay, Scrap)
+  👤 6. User Profile & Role Switcher
+        • Manager Mode vs. Warehouse Staff Mode
+        • Logout
+
+
+3. CORE MODULE SPECIFICATIONS (OFFICIAL REQUIREMENTS)
+--------------------------------------------------------------------------------
+
+3.1 Authentication & Security:
+  - User Sign-Up and Log-In flow with role attribution (Manager / Staff).
+  - Simulated OTP-based password reset ("Forgot Password" -> 6-digit OTP verification).
+  - Instant redirection to the main Inventory Dashboard upon authentication.
+
+3.2 Landing Dashboard & Executive KPIs:
+  The dashboard renders a live snapshot of warehouse throughput.
+  - Top 5 Required KPI Metric Cards:
+      1. Total Products in Stock (Total on-hand SKU quantity and valuation in INR).
+      2. Low Stock / Out of Stock Items (Count of SKUs at or below safety stock).
+      3. Pending Receipts (Incoming vendor purchase orders awaiting arrival/validation).
+      4. Pending Deliveries (Outgoing customer sales orders awaiting pick/pack/validation).
+      5. Internal Transfers Scheduled (Transfers queued between internal storage locations).
+  - Dynamic Filters Toolbar:
+      • By Document Type: Receipts | Delivery Orders | Internal Transfers | Adjustments
+      • By Status: Draft | Waiting | Ready | Done | Canceled
+      • By Warehouse / Location: All | Main Warehouse | Production Floor | Rack A | Rack B
+      • By Product Category: Raw Materials | Finished Goods | Electronics | Grocery
+
+3.3 Product Management:
+  - Create, view, and update products with the following schema:
+      * Product Name (e.g., "Steel Rods", "Office Chairs", "Wireless Mouse")
+      * SKU / Internal Reference Code (e.g., "RAW-STL-001", "FURN-CHR-010")
+      * Category (Raw Material, Work-in-Progress, Finished Goods, Consumables)
+      * Unit of Measure (UoM: kg, units, meters, liters, boxes)
+      * Cost Price & Selling Price
+      * Initial On-Hand Stock (optional on creation)
+  - Real-Time Multi-Location Stock Availability:
+      * Breaks down quantity on hand across Warehouse 1, Main Store, Production Rack, 
+        and Delivery Staging.
+
+3.4 Operation 1: Receipts (Incoming Stock Flow):
+  - Purpose: Register and validate incoming goods received from suppliers.
+  - Step-by-Step Flow:
+      1. Click "New Receipt".
+      2. Select Supplier and Destination Warehouse/Location.
+      3. Add product line items and quantity received.
+      4. Document moves from "Draft" -> "Ready".
+      5. Click "Validate": System automatically increments product stock, marks 
+         the status as "Done", and records a credit in the Stock Ledger.
+      * Example: Receive 50 units of "Steel Rods" -> Total stock immediately increases by +50.
+
+3.5 Operation 2: Delivery Orders (Outgoing Stock Flow):
+  - Purpose: Manage picking, packing, and dispatch of finished goods to customers.
+  - Step-by-Step Flow:
+      1. Click "New Delivery Order".
+      2. Step 1 - Pick Items: Warehouse staff verifies items picked from racks.
+      3. Step 2 - Pack Items: Items verified and packaged for shipping.
+      4. Step 3 - Validate: System automatically decrements stock, marks status 
+         as "Done", and logs a debit in the Stock Ledger.
+      * Example: Customer order for 10 Chairs -> Delivery order reduces chairs by 10.
+
+3.6 Operation 3: Internal Transfers:
+  - Purpose: Relocate materials and inventory within internal company premises.
+  - Step-by-Step Flow:
+      1. Select Source Location (e.g., "Main Store" or "Rack A").
+      2. Select Destination Location (e.g., "Production Rack" or "Rack B").
+      3. Specify product and quantity.
+      4. Click "Validate Transfer":
+         * Total company-wide inventory remains completely unchanged.
+         * Location-level breakdown updates instantly (Main Store -20, Production Rack +20).
+         * Every movement is permanently logged in the Move History ledger.
+
+3.7 Operation 4: Inventory Adjustments (Physical Cycle Counting):
+  - Purpose: Resolve mismatches between system recorded quantities and physical counts.
+  - Step-by-Step Flow:
+      1. Select Product and Location to audit.
+      2. Display current System Recorded Stock.
+      3. Enter actual Physical Counted Quantity.
+      4. System automatically computes:
+         * Variance = Physical Count - System Count
+         * Shrinkage % = ((System - Physical) / System) * 100
+      5. Select Adjustment Reason (e.g., "Damaged Items", "Cycle Count Discrepancy", "Theft").
+      6. Click "Apply Adjustment": System auto-updates recorded stock to match physical 
+         count and writes an immutable audit record in the Stock Ledger.
+
+3.8 Move History (The Double-Entry Stock Ledger):
+  - The single source of truth for all inventory movements.
+  - Table Schema:
+      * Reference ID (e.g., "WH/IN/0001", "WH/INT/0002", "WH/OUT/0003")
+      * Timestamp (Date & Time)
+      * Product Name & SKU
+      * From (Source Location / Vendor)
+      * To (Destination Location / Customer / Scrap)
+      * Quantity & UoM (+50 units, -10 units)
+      * Movement Status (Done)
+
+
+4. 🏆 "FEATURES TO WIN" (UNIQUE INNOVATIONS TO BEAT ALL COMPETITORS)
+--------------------------------------------------------------------------------
+To stand out and secure 1st place in the Odoo hackathon, StockSense implements 
+five high-impact, enterprise-grade capabilities that other submissions will lack:
+
+4.1 Innovation 1: Interactive "1-Click Official Odoo Scenario Walkthrough"
+  - A prominent demo banner in the top navigation: "▶ Run Official Odoo Flow".
+  - One-click executes the exact 4-step example provided in Odoo's problem statement:
+      * Step 1: Receive 100 kg Steel from Vendor (+100 in Main Store).
+      * Step 2: Internal Transfer: Move 80 kg from Main Store -> Production Rack.
+      * Step 3: Deliver Finished Goods: Ship 20 kg to Customer (-20 stock).
+      * Step 4: Adjust Damaged Items: 3 kg damaged found on rack -> adjust stock (-3).
+  - Evaluators watch the KPIs, Location quantities, and Stock Ledger update live 
+    in front of their eyes within 15 seconds.
+
+4.2 Innovation 2: Odoo Double-Entry Visual Flow Map
+  - An interactive visual node diagram showing real-time inventory moving between:
+    [Vendors (Virtual)] ---> [Main Store] ---> [Production Floor] ---> [Customers (Virtual)]
+                                   │
+                                   └───> [Scrap / Damaged (Virtual)]
+  - Evaluators will recognize Odoo's signature double-entry methodology visualized cleanly.
+
+4.3 Innovation 3: Dynamic Predictive Reordering Rules (AI Stress-Test)
+  - Instead of static min/max numbers, StockSense introduces an intelligent formula:
+      Reorder Point (ROP) = (Average Daily Demand * Lead Time) + Safety Stock
+      Days of Inventory Remaining (DIR) = Current Stock / Average Daily Demand
+  - Includes interactive "Demand Spike" (0% to +100%) and "Supplier Delay" sliders.
+  - An evaluator can slide to "+50% demand" and see low-stock alerts trigger immediately 
+    with a 1-click "Create Draft Receipt" button.
+
+4.4 Innovation 4: Smart Barcode & Quick-Action Scanner Simulator
+  - Built specifically for the "Warehouse Staff" persona.
+  - A virtual scanner tool where users can click or scan SKU barcodes to trigger instant:
+      * Instant Pick validation
+      * Quick Bin-to-Bin Transfer
+      * Instant Count verification
+  - Features audio chime confirmation and visual scanner beam animations.
+
+4.5 Innovation 5: FEFO & Perishable Batch Expiry Intelligence
+  - Tracks lot/batch numbers with expiration dates for perishable and consumable goods.
+  - Implements First-Expired, First-Out (FEFO) picking priority over simple FIFO.
+  - Recommends automated progressive dynamic markdowns (15% -> 35% -> 60%) for 
+    batches nearing expiry to salvage margin before spoilage.
+
+4.6 Innovation 6: Shrinkage Financial Impact & Anomaly Detection
+  - Turns simple stock adjustments into actionable business intelligence.
+  - Automatically calculates total rupee value of damaged and lost inventory.
+  - Highlights highest-risk leakage categories and generates a downloadable Audit Summary.
+
+
+5. DATA MODEL & INITIAL SEED DATASET
+--------------------------------------------------------------------------------
+The seed dataset contains realistic multi-location products designed to validate 
+every operation and test case:
+
+5.1 Warehouses & Locations:
+  - WH1: Main Central Warehouse (Locations: Main Store [Rack A, Rack B], Staging Area)
+  - WH2: Manufacturing Plant (Locations: Production Floor, Raw Material Silo)
+  - Virtual Locations: Vendors (Partner/Vendors), Customers (Partner/Customers), Scrap/Damage
+
+5.2 Products Seed (20+ Items across 3 Categories):
+  - Category: Raw Materials & Manufacturing
+      1. Steel Rods (SKU: RAW-STL-001, UoM: kg, Cost: Rs. 65, Stock: 100 kg)
+      2. Aluminum Sheets (SKU: RAW-ALU-002, UoM: sq.m, Cost: Rs. 420, Stock: 45 sq.m)
+      3. Industrial Screws M8 (SKU: RAW-SCR-003, UoM: units, Cost: Rs. 2, Stock: 1,500 units)
+      4. High-Grade Motor Oil (SKU: RAW-OIL-004, UoM: liters, Cost: Rs. 310, Stock: 80 liters)
+  - Category: Finished Goods & Electronics
+      5. Ergonomic Office Chair (SKU: FURN-CHR-010, UoM: units, Cost: Rs. 3,500, Stock: 14 units)
+      6. Wireless Optical Mouse (SKU: ELEC-MOU-001, UoM: units, Cost: Rs. 410, Stock: 8 units - LOW)
+      7. Fast-Charging USB-C Cable (SKU: ELEC-CAB-002, UoM: units, Cost: Rs. 120, Stock: 180 units)
+      8. Bluetooth Soundbar (SKU: ELEC-SPK-003, UoM: units, Cost: Rs. 1,800, Stock: 22 units)
+  - Category: Perishables / Consumables (With Batch Expiry)
+      9. Greek Yogurt Pack (SKU: GROC-YOG-001, UoM: packs, Cost: Rs. 45, Stock: 120, Batch: B-102, Exp: 7 days)
+      10. Organic Cold-Pressed Juice (SKU: GROC-JUC-002, UoM: bottles, Cost: Rs. 85, Stock: 90, Batch: B-088, Exp: 14 days)
+
+
+6. TECHNICAL STACK & ARCHITECTURAL DECISIONS
+--------------------------------------------------------------------------------
+- Frontend Framework: React 18+ with Vite (Instant hot-reloading, ultra-clean code).
+- Styling & Theming: Tailwind CSS with an Odoo-inspired purple & enterprise dark-navy aesthetic.
+- State Management: React Context + LocalStorage persistence (guarantees state stays saved 
+  when refreshing during judging, with zero backend setup friction).
+- Icons: Lucide React (Official enterprise icon library: Boxes, ArrowDownLeft, ArrowUpRight, 
+  RefreshCw, Barcode, AlertTriangle, Layers, Building).
+- Printable Receipts & Audit Sheets: Browser print styles (@media print) for Receipts & POs.
+
+
+7. 4-HOUR HACKATHON COMMIT ROADMAP (RULE 04 COMPLIANCE)
+--------------------------------------------------------------------------------
+Structured for 4 distinct team members with hourly Git commits:
+
+🕒 Hour 1 — Core Layout, Navigation & Product Management
+  • Assignee: Krish Sharma (Team Leader)
+  • Tasks:
+      - Vite + React + Tailwind structure.
+      - Top Navbar, Sidebar navigation, and Dashboard KPI metric cards.
+      - Product catalog table with Create/Update modal and UoM selectors.
+      - Initial mock dataset setup with multi-warehouse locations.
+  • Git Commit: "feat: initialize enterprise layout, product management, and multi-location data"
+
+🕒 Hour 2 — Operations Hub (Receipts & Delivery Orders)
+  • Assignee: Gursimarjit Singh
+  • Tasks:
+      - Receipts workflow (Vendor selection, product line items, "Validate" -> stock increment).
+      - Delivery Orders workflow (Pick, Pack, "Validate" -> stock decrement).
+      - Status badges (Draft, Waiting, Ready, Done).
+      - Dynamic document filters (Receipts, Deliveries, Status, Warehouse).
+  • Git Commit: "feat: implement incoming receipts and outgoing delivery operations with stock automation"
+
+🕒 Hour 3 — Internal Transfers, Stock Adjustments & Move History Ledger
+  • Assignee: Siratpreet Kaur
+  • Tasks:
+      - Internal Transfers module (Main Store -> Production Rack, etc.).
+      - Inventory Adjustments module (Physical count vs recorded stock, variance computation).
+      - Double-entry Move History Stock Ledger (immutable timestamped audit trail).
+      - Official 4-step Odoo walkthrough button simulation.
+  • Git Commit: "feat: add internal transfers, cycle count adjustments, and double-entry stock ledger"
+
+🕒 Hour 4 — Winning Innovations, Printable POs & Final Polish
+  • Assignee: Navya Mahajan
+  • Tasks:
+      - Predictive reordering rules with demand spike slider and ROP logic.
+      - Smart barcode scanner simulator with pick/receive shortcuts.
+      - FEFO batch expiry alert table with dynamic markdowns.
+      - Printable PO and inventory audit receipt generation.
+      - Comprehensive README.md and demo video preparation.
+  • Git Commit: "feat: add predictive ROP engine, barcode simulator, FEFO batching, and complete documentation"
+
+
+8. EVALUATOR DEMO SCRIPT (5-MINUTE WINNING WALKTHROUGH)
+--------------------------------------------------------------------------------
+[0:00 - 0:45] The Pitch:
+  "Hello evaluators. We are Team DEBUGGERS. We built StockSense — a modular Inventory 
+  Management System tailored specifically to Odoo's design principles. StockSense replaces 
+  clunky spreadsheets and manual registers with real-time, double-entry inventory tracking."
+
+[0:45 - 1:45] The 5 Dashboard KPIs & Dynamic Filtering:
+  "Our landing dashboard shows the 5 required operational metrics: Total Products in Stock, 
+  Low Stock alerts, Pending Receipts, Pending Deliveries, and Scheduled Internal Transfers. 
+  Our dynamic filters let managers slice data by document type, status, warehouse, and category."
+
+[1:45 - 2:45] The 4-Step Official Odoo Flow Demo:
+  "To prove end-to-end functionality, watch our 1-click Odoo Flow execution:
+   1. We receive 100 kg of Steel from our vendor. Click 'Validate' -> Stock increases to 100.
+   2. We schedule an internal transfer to move 80 kg to the Production Rack. Total stock remains 
+      100, but location availability updates.
+   3. We create a delivery order for 20 kg. Click Pick, Pack, and Validate -> Stock reduces to 80.
+   4. A warehouse check finds 3 kg damaged. We perform a Stock Adjustment -> Stock adjusts to 77.
+   Every single transaction is immediately recorded in our immutable Move History Stock Ledger."
+
+[2:45 - 3:45] Winning Innovations (Predictive ROP & Barcode Simulator):
+  "StockSense goes beyond basic CRUD:
+   - Our Reordering Rules feature a dynamic ROP engine. By adjusting the 'Demand Spike' slider, 
+     critical shortages are detected dynamically before they occur.
+   - For warehouse floor staff, our Barcode Simulator allows 1-click scanning for rapid picking 
+     and shelving without touching a keyboard."
+
+[3:45 - 4:45] FEFO Batch Expiry & Shrinkage Analytics:
+  "For perishable stock like food and pharma, we enforce FEFO (First-Expired, First-Out) 
+  batch sequencing and provide smart markdown recommendations. Our stock adjustment 
+  module also calculates shrinkage financial loss, highlighting high-risk leakages."
+
+[4:45 - 5:15] Architecture & Conclusion:
+  "StockSense is fully modular, responsive, and ready to interface directly with Odoo 
+  APIs via XML-RPC. It solves the exact pain points of inventory tracking with zero friction. 
+  Thank you!"
+
+================================================================================
+END OF WINNING PRD DOCUMENT
+================================================================================
