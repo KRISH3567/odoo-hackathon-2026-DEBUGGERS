@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Printer, X } from 'lucide-react';
+import { Printer, X } from 'lucide-react';
 
 export default function SlipModal({ isOpen, onClose, operation }) {
   if (!isOpen || !operation) return null;
@@ -22,9 +22,7 @@ export default function SlipModal({ isOpen, onClose, operation }) {
         {/* Modal Top Bar (Hidden during print) */}
         <div className="flex items-center justify-between pb-3 border-b border-surface-container print:hidden">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-primary-container/20 text-primary border border-primary/20">
-              <FileText className="w-4 h-4" />
-            </div>
+            <img src="/stocksense-icon.png" alt="StockSense" className="w-5 h-5 rounded object-contain" />
             <span className="text-xs font-mono font-bold text-on-surface">DOCUMENT PREVIEW • {operation.ref}</span>
           </div>
           <div className="flex items-center gap-2">
@@ -48,15 +46,22 @@ export default function SlipModal({ isOpen, onClose, operation }) {
         <div className="p-6 bg-white text-slate-900 border border-slate-200 rounded-xl flex flex-col gap-5 print:border-none print:p-0 font-sans shadow-sm">
           {/* Header */}
           <div className="flex items-start justify-between border-b-2 border-slate-900 pb-4">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-black tracking-tight text-slate-900">StockSense IMS</span>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-slate-900 text-white font-mono font-bold">
-                  ODOO v2.0
-                </span>
+            <div className="flex items-center gap-3">
+              <img
+                src="/stocksense-logo-transparent.png"
+                alt="StockSense Logo"
+                className="w-12 h-12 object-contain shrink-0"
+              />
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-black tracking-tight text-slate-900">StockSense IMS</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-slate-900 text-white font-mono font-bold">
+                    ODOO v2.0
+                  </span>
+                </div>
+                <span className="text-xs text-slate-500 mt-0.5">Enterprise Double-Entry Logistics Network</span>
+                <span className="text-[11px] text-slate-500">WH1 Central Distribution Hub • Mumbai Industrial Corridor</span>
               </div>
-              <span className="text-xs text-slate-500 mt-1">Enterprise Double-Entry Logistics Network</span>
-              <span className="text-[11px] text-slate-500">WH1 Central Distribution Hub • Mumbai Industrial Corridor</span>
             </div>
             <div className="flex flex-col items-end">
               <span className="text-xs font-mono font-bold text-slate-900">{operation.ref}</span>

@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
 import { useInventory } from '../../context/InventoryContext';
-import {
-  Printer,
-  QrCode,
-  Tag,
-  X
-} from 'lucide-react';
+import { Printer, QrCode, X } from 'lucide-react';
 
 export default function BarcodeLabelsModal({ isOpen, onClose, initialSku }) {
   const { products } = useInventory();
@@ -62,10 +57,8 @@ export default function BarcodeLabelsModal({ isOpen, onClose, initialSku }) {
       <div className="w-full max-w-4xl rounded-2xl bg-surface-container-lowest p-6 shadow-2xl border border-surface-container flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200 max-h-[95vh] overflow-y-auto print:p-0 print:border-none print:shadow-none print:max-h-none print:bg-white">
         {/* Top Control Bar (Hidden when printing) */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-surface-container print:hidden">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-primary-container/20 text-primary-light border border-primary/20">
-              <Tag className="w-5 h-5" />
-            </div>
+          <div className="flex items-center gap-3">
+            <img src="/stocksense-icon.png" alt="StockSense" className="w-9 h-9 rounded-xl object-contain shadow-purple-glow" />
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-headline text-lg font-bold text-on-surface">Industrial Shelf Barcode Label Sheet</h3>
@@ -129,9 +122,12 @@ export default function BarcodeLabelsModal({ isOpen, onClose, initialSku }) {
                 {/* Sticker Header */}
                 <div className="flex items-start justify-between border-b border-slate-200 pb-2">
                   <div className="flex flex-col">
-                    <span className="font-mono text-[9px] uppercase font-bold text-slate-500 tracking-wider">
-                      StockSense IMS • Bin Label
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <img src="/stocksense-logo-transparent.png" alt="StockSense" className="w-3.5 h-3.5 object-contain" />
+                      <span className="font-mono text-[9px] uppercase font-bold text-slate-500 tracking-wider">
+                        StockSense IMS • Bin Label
+                      </span>
+                    </div>
                     <h4 className="font-sans text-sm font-bold text-slate-900 leading-tight line-clamp-1 mt-0.5">
                       {p.name}
                     </h4>

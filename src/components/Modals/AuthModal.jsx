@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useInventory } from '../../context/InventoryContext';
-import { Shield, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 export default function AuthModal({ isOpen, onClose }) {
   const { setUser, switchRole, triggerToast } = useInventory();
@@ -96,10 +96,8 @@ export default function AuthModal({ isOpen, onClose }) {
       <div className="w-full max-w-md rounded-2xl bg-surface-container-lowest p-6 shadow-2xl border border-surface-container flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-surface-container">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-primary-container/20 text-primary border border-primary/20">
-              <Shield className="w-5 h-5" />
-            </div>
+          <div className="flex items-center gap-3">
+            <img src="/stocksense-icon.png" alt="StockSense" className="w-10 h-10 rounded-xl object-contain shadow-purple-glow" />
             <div>
               <h3 className="font-headline text-lg font-bold text-on-surface">
                 {mode === 'signin' && 'Sign In to StockSense'}

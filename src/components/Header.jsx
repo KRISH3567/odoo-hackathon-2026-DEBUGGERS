@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
+import Logo from './Logo';
 import {
   Warehouse,
   Search,
   ScanLine,
-  Plus,
   Bell,
   ArrowLeftRight,
-  Boxes,
   ChevronDown,
   UserCheck,
   RefreshCw,
@@ -20,7 +19,6 @@ import {
 
 export default function Header({
   onOpenScanModal,
-  onOpenNewProductModal,
   onOpenAuthModal,
   onOpenVoiceModal,
   mobileSidebarOpen,
@@ -54,103 +52,95 @@ export default function Header({
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-surface-container-lowest shadow-[0_2px_12px_rgba(0,0,0,0.4)] border-b border-surface-container px-4 sm:px-6 flex items-center justify-between gap-4">
-      {/* Left: Mobile Toggle, Brand & Warehouse Filter */}
-      <div className="flex items-center gap-3 sm:gap-5">
+    <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-[#0a0f1d]/90 backdrop-blur-xl border-b border-slate-800/80 px-4 sm:px-6 flex items-center justify-between gap-4 shadow-sm">
+      {/* Left: Mobile Menu, Brand Logo & Warehouse Selector */}
+      <div className="flex items-center gap-3 sm:gap-6">
         <button
           onClick={() => setMobileSidebarOpen?.(!mobileSidebarOpen)}
-          className="md:hidden p-2 rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition-colors"
+          className="md:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors"
           title="Toggle Navigation Menu"
         >
           {mobileSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
 
+        {/* Brand */}
         <div 
-          className="flex items-center gap-2.5 cursor-pointer group"
+          className="flex items-center gap-3 cursor-pointer group"
           onClick={() => setCurrentView('dashboard')}
         >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary-container text-on-primary flex items-center justify-center font-bold shadow-purple-glow transition-transform group-hover:scale-105">
-            <Boxes className="w-5 h-5" />
-          </div>
+          <Logo variant="icon" className="w-9 h-9 transition-transform group-hover:scale-105" />
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
-              <span className="font-headline text-lg font-bold tracking-tight text-on-surface group-hover:text-primary transition-colors">
-                StockSense
+              <span className="font-headline text-lg font-bold tracking-tight text-white group-hover:text-purple-400 transition-colors">
+                Stock<span className="text-purple-400">Sense</span>
               </span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded bg-primary-container/40 text-primary-light font-mono font-bold border border-primary/30">
-                MVP
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/15 text-purple-300 font-mono font-bold border border-purple-500/30">
+                Odoo MVP
               </span>
             </div>
-            <span className="text-[11px] text-secondary font-medium hidden sm:inline">
-              Inventory Management System
+            <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+              Double-Entry Inventory
             </span>
           </div>
         </div>
 
-        <div className="h-6 w-px bg-outline/20 hidden sm:block"></div>
+        <div className="h-6 w-px bg-slate-800 hidden sm:block"></div>
 
-        {/* Warehouse Selector */}
+        {/* Warehouse Location Selector */}
         <div className="relative hidden md:flex items-center">
-          <Warehouse className="absolute left-2.5 w-4 h-4 text-secondary pointer-events-none" />
+          <Warehouse className="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" />
           <select
             value={activeWarehouse}
             onChange={(e) => {
               setActiveWarehouse(e.target.value);
               triggerToast(`Filtered view to: ${e.target.options[e.target.selectedIndex].text}`);
             }}
-            className="h-9 pl-8 pr-7 bg-surface-container-low text-on-surface text-xs font-semibold rounded-lg border border-surface-container focus:ring-1 focus:ring-primary outline-none cursor-pointer appearance-none transition-colors hover:bg-surface-container"
+            className="h-9 pl-9 pr-8 bg-slate-900/60 hover:bg-slate-800/60 text-slate-200 text-xs font-semibold rounded-xl border border-slate-800 focus:border-purple-500/50 outline-none cursor-pointer appearance-none transition-colors"
           >
-            <option value="all">Consolidated (All Warehouses)</option>
+            <option value="all">All Warehouses (Consolidated)</option>
             <option value="wh1">WH1: Central Warehouse (Main Store)</option>
             <option value="wh2">WH2: Manufacturing Plant (Floor)</option>
           </select>
-          <ChevronDown className="absolute right-2 w-3.5 h-3.5 text-secondary pointer-events-none" />
+          <ChevronDown className="absolute right-2.5 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
         </div>
       </div>
 
-      {/* Right: Quick Search, Actions, Role Toggle & Profile */}
+      {/* Right: Quick Search & Floor Utilities */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Quick Search */}
+        {/* Quick Search Bar */}
         <form onSubmit={handleSearchSubmit} className="relative hidden lg:flex items-center">
-          <Search className="absolute left-2.5 w-4 h-4 text-secondary" />
+          <Search className="absolute left-3 w-4 h-4 text-slate-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search SKU, product, batch..."
-            className="h-9 w-48 xl:w-64 pl-8 pr-3 bg-surface-container-low text-on-surface placeholder:text-secondary text-xs rounded-lg border border-surface-container outline-none focus:ring-1 focus:ring-primary transition-all focus:w-72"
+            placeholder="Search SKU, product, barcode..."
+            className="h-9 w-52 xl:w-64 pl-9 pr-8 bg-slate-900/60 text-slate-200 placeholder:text-slate-500 text-xs rounded-xl border border-slate-800 focus:border-purple-500/60 outline-none transition-all focus:w-72"
           />
+          <span className="absolute right-2.5 font-mono text-[10px] text-slate-500 bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-700/50">
+            /
+          </span>
         </form>
 
-        {/* Quick Scan Button */}
+        {/* Floor Barcode Scanner */}
         <button
           onClick={onOpenScanModal}
-          className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-all border border-surface-container shadow-2xs active:scale-95"
-          title="Quick Optical Barcode Scanner"
+          className="flex items-center gap-1.5 h-9 px-3 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-200 text-xs font-semibold transition-all border border-slate-800 active:scale-95 hover:border-emerald-500/30"
+          title="Optical Barcode & QR Camera Scanner"
         >
-          <ScanLine className="w-4 h-4 text-tertiary" />
-          <span className="hidden sm:inline">Scan</span>
+          <ScanLine className="w-4 h-4 text-emerald-400" />
+          <span className="hidden sm:inline">Scanner</span>
         </button>
 
-        {/* Hands-Free Voice Button */}
+        {/* Hands-Free Voice Assistant */}
         <button
           onClick={onOpenVoiceModal}
-          className="flex items-center gap-1.5 h-9 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-all border border-surface-container shadow-2xs active:scale-95 group"
-          title="Hands-Free Floor Voice Assistant (Press 'V')"
+          className="flex items-center gap-1.5 h-9 px-3 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-200 text-xs font-semibold transition-all border border-slate-800 active:scale-95 hover:border-purple-500/30 group"
+          title="Hands-Free Voice Terminal (Press 'V')"
         >
-          <Mic className="w-4 h-4 text-primary-light group-hover:scale-110 transition-transform" />
+          <Mic className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
           <span className="hidden sm:inline">Voice</span>
-          <span className="font-mono text-[9px] px-1 py-0.2 rounded bg-surface-container-high text-secondary hidden xl:inline">V</span>
-        </button>
-
-        {/* New Product Button */}
-        <button
-          onClick={onOpenNewProductModal}
-          className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-bold transition-all shadow-purple-glow active:scale-95"
-          title="Create New Product SKU"
-        >
-          <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline">+ Add Product</span>
+          <span className="font-mono text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-400 hidden xl:inline">V</span>
         </button>
 
         {/* Low Stock Alert Bell */}
@@ -159,54 +149,54 @@ export default function Header({
             setCurrentView('products');
             triggerToast(`${lowStockCount} items currently critical under safety stock!`);
           }}
-          className="relative p-2 rounded-lg hover:bg-surface-container transition-colors text-secondary hover:text-on-surface border border-transparent hover:border-surface-container"
+          className="relative p-2 rounded-xl hover:bg-slate-800/60 transition-colors text-slate-400 hover:text-white border border-transparent hover:border-slate-800"
           title="Low Stock Alerts"
         >
-          <Bell className="w-5 h-5" />
+          <Bell className="w-4 h-4" />
           {lowStockCount > 0 && (
-            <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-error text-white font-mono text-[10px] font-bold shadow-sm">
+            <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-white font-mono text-[10px] font-bold shadow-md animate-pulse">
               {lowStockCount}
             </span>
           )}
         </button>
 
-        {/* Role Switcher Pill */}
+        {/* Fast Role Switcher Pill */}
         <button
           onClick={handleToggleRole}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
             user.role === 'manager'
-              ? 'bg-primary-container/30 text-primary-light border-primary/40 hover:bg-primary-container/50'
-              : 'bg-tertiary-container/30 text-tertiary border-tertiary/40 hover:bg-tertiary-container/50'
+              ? 'bg-purple-500/15 text-purple-300 border-purple-500/30 hover:bg-purple-500/25 shadow-purple-glow'
+              : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25'
           }`}
           title="Click to toggle between Manager Mode and Warehouse Staff Mode"
         >
-          <span className={`w-2 h-2 rounded-full ${user.role === 'manager' ? 'bg-primary' : 'bg-tertiary'} animate-pulse`}></span>
-          <span className="font-bold">{user.role === 'manager' ? 'Manager' : 'Staff'}</span>
-          <ArrowLeftRight className="w-3.5 h-3.5 opacity-80" />
+          <span className={`w-2 h-2 rounded-full ${user.role === 'manager' ? 'bg-purple-400' : 'bg-emerald-400'}`}></span>
+          <span className="font-bold">{user.role === 'manager' ? '👔 Manager' : '👷 Staff'}</span>
+          <ArrowLeftRight className="w-3 h-3 opacity-60" />
         </button>
 
-        {/* User Profile Pill & Dropdown */}
+        {/* Profile Avatar & Menu */}
         <div className="relative">
           <button
             onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-            className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-surface-container transition-colors cursor-pointer border border-transparent hover:border-surface-container"
+            className="flex items-center gap-1.5 p-1 rounded-xl hover:bg-slate-800/60 transition-colors cursor-pointer border border-transparent hover:border-slate-800"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-primary-container flex items-center justify-center text-white font-bold text-xs shadow-sm">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center text-white font-bold text-xs shadow-md">
               {user.name.split(' ').map(n => n[0]).join('') || 'AV'}
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-secondary hidden sm:block" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
           </button>
 
           {profileDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-64 bg-surface-container-lowest rounded-xl shadow-2xl border border-surface-container p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-              <div className="p-2.5 border-b border-surface-container mb-1">
+            <div className="absolute right-0 mt-2 w-64 bg-[#0d1322] rounded-2xl shadow-2xl border border-slate-800 p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div className="p-3 border-b border-slate-800 mb-1">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-bold text-on-surface">{user.name}</p>
-                  <span className="font-mono text-[9px] px-1.5 py-0.5 rounded bg-primary-container text-on-primary font-bold uppercase">
+                  <p className="text-xs font-bold text-slate-100">{user.name}</p>
+                  <span className="font-mono text-[9px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold uppercase border border-purple-500/30">
                     {user.role}
                   </span>
                 </div>
-                <p className="text-[11px] text-secondary font-mono mt-0.5">{user.email}</p>
+                <p className="text-[11px] text-slate-400 font-mono mt-0.5">{user.email}</p>
               </div>
 
               {/* Demo Scenario Trigger */}
@@ -215,10 +205,10 @@ export default function Header({
                   runOfficialOdooScenario();
                   setProfileDropdownOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-primary-container/20 text-xs text-primary-light font-medium text-left transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-purple-500/15 text-xs text-purple-300 font-medium text-left transition-colors"
               >
-                <Sparkles className="w-4 h-4 text-primary" />
-                <span>Run Tata Steel Demo Scenario</span>
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                <span>Run Demo Scenario</span>
               </button>
 
               <button
@@ -226,9 +216,9 @@ export default function Header({
                   handleToggleRole();
                   setProfileDropdownOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-surface-container text-xs text-on-surface font-medium text-left transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-xs text-slate-200 font-medium text-left transition-colors"
               >
-                <UserCheck className="w-4 h-4 text-secondary" />
+                <UserCheck className="w-4 h-4 text-slate-400" />
                 <span>Switch to {user.role === 'manager' ? 'Staff Mode' : 'Manager Mode'}</span>
               </button>
 
@@ -237,10 +227,10 @@ export default function Header({
                   onOpenAuthModal?.();
                   setProfileDropdownOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-surface-container text-xs text-on-surface font-medium text-left transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-slate-800 text-xs text-slate-200 font-medium text-left transition-colors"
               >
-                <KeyRound className="w-4 h-4 text-secondary" />
-                <span>Switch User / OTP Reset</span>
+                <KeyRound className="w-4 h-4 text-slate-400" />
+                <span>Switch User / OTP Login</span>
               </button>
 
               <button
@@ -248,10 +238,10 @@ export default function Header({
                   resetAllData();
                   setProfileDropdownOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-error-container/20 text-xs text-error font-medium text-left transition-colors"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-rose-500/15 text-xs text-rose-400 font-medium text-left transition-colors"
               >
-                <RefreshCw className="w-4 h-4 text-error" />
-                <span>Reset to Clean Seed Data</span>
+                <RefreshCw className="w-4 h-4 text-rose-400" />
+                <span>Reset to Seed Data</span>
               </button>
             </div>
           )}
