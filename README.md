@@ -3,9 +3,8 @@
 > **Team Name:** DEBUGGERS  
 > **Team Members:**
 > 1. **Krish Sharma** (Team Leader) — GitHub: [@KRISH3567](https://github.com/KRISH3567)
-> 2. **Gursimarjit Singh**
-> 3. **Siratpreet Kaur**
-> 4. **Navya Mahajan**  
+> 2. **Siratpreet Kaur** — GitHub: [@siratpreetkaur18](https://github.com/siratpreetkaur18)
+> 3. **Navya Mahajan** — GitHub: [@mahajannavya29-sys](https://github.com/mahajannavya29-sys)  
 > **Date:** September 26, 2026  
 > **Specification Compliance:** 100% Alignment with Official Odoo Double-Entry PRD + Winning Innovations
 
@@ -16,6 +15,16 @@
 Traditional micro, small, and medium businesses (MSMEs) rely heavily on manual paper registers, fragmented Excel spreadsheets, and informal communication channels to manage warehouse inventory. This causes frequent stockouts, untracked shrinkage, delayed customer shipments, and costly discrepancies.
 
 **StockSense IMS** digitizes and unifies all incoming, outgoing, internal, and adjustment stock operations into an intuitive, real-time platform matching **Odoo's world-class double-entry inventory philosophy**.
+
+---
+
+## 👥 Team Information
+- **Team Name:** DEBUGGERS
+- **Team Leader:** Krish Sharma ([@KRISH3567](https://github.com/KRISH3567))
+- **Team Members:**
+  1. **Krish Sharma** (Team Leader) — GitHub: [@KRISH3567](https://github.com/KRISH3567)
+  2. **Siratpreet Kaur** — GitHub: [@siratpreetkaur18](https://github.com/siratpreetkaur18)
+  3. **Navya Mahajan** — GitHub: [@mahajannavya29-sys](https://github.com/mahajannavya29-sys)
 
 ---
 
@@ -76,6 +85,7 @@ Traditional micro, small, and medium businesses (MSMEs) rely heavily on manual p
 
 - **Frontend:** React 19 + Vite (lightning-fast build & hot module replacement)
 - **Styling:** Tailwind CSS v4 with an enterprise Odoo aubergine & clean navy color palette
+- **Icons:** Lucide React
 - **Typography:** Geist, Inter, and JetBrains Mono with Google Material Symbols
 - **State Architecture:** React Context API with LocalStorage caching (state persists across browser refreshes with zero backend friction)
 - **Sound Effects:** Pure HTML5 Web Audio API synthesizer (no external audio assets required)
@@ -83,17 +93,18 @@ Traditional micro, small, and medium businesses (MSMEs) rely heavily on manual p
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started & Local Setup
 
 ### Prerequisites
-- Node.js (v18 or higher)
-- npm (v9 or higher)
+- Node.js (v18 or higher recommended)
+- npm or yarn
 
 ### Installation & Run
 
 1. Clone or navigate to the repository directory:
    ```bash
-   cd stocksense
+   git clone https://github.com/KRISH3567/odoo-hackathon-2026-DEBUGGERS.git
+   cd odoo-hackathon-2026-DEBUGGERS
    ```
 
 2. Install dependencies:
@@ -110,6 +121,11 @@ Traditional micro, small, and medium businesses (MSMEs) rely heavily on manual p
    ```bash
    npm run build
    ```
+
+---
+
+## 🎥 Demo Video Link
+- **Demo Video:** *[To be updated upon recording submission]* (Duration: 5–6 Minutes)
 
 ---
 
