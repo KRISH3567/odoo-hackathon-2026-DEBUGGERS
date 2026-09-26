@@ -1,20 +1,23 @@
 import React from 'react';
 import { useInventory } from '../context/InventoryContext';
 import {
-  ArrowDownLeft,
+  LayoutDashboard,
+  Package,
   ArrowLeftRight,
+  FileText,
+  ScanLine,
+  ArrowDownLeft,
   Truck,
-  Trash2,
-  Grid3X3,
-  QrCode,
-  PlusCircle,
-  MoveUpRight,
+  Plus,
   SlidersHorizontal,
-  HardDrive
+  Shield,
+  Zap
 } from 'lucide-react';
 
 export default function Sidebar({
+  onOpenNewProductModal,
   onOpenReceiptModal,
+  onOpenDeliveryModal,
   onOpenTransferModal,
   onOpenAdjustmentModal,
   mobileSidebarOpen,
@@ -23,77 +26,53 @@ export default function Sidebar({
   const {
     currentView,
     setCurrentView,
+    products,
     pendingReceiptsCount,
     pendingDeliveriesCount,
-    scheduledTransfersCount
+    user,
+    switchRole
   } = useInventory();
 
-  const operationsLinks = [
+  const totalPendingOps = pendingReceiptsCount + pendingDeliveriesCount;
+
+  const mainNavItems = [
     {
-      id: 'receipts',
-      label: 'Receipts',
-      icon: ArrowDownLeft,
-      badge: pendingReceiptsCount,
-      targetView: 'operations',
-      onClick: () => {
-        setCurrentView('operations');
-        setMobileSidebarOpen?.(false);
-      }
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: LayoutDashboard,
+      badge: null
     },
     {
-      id: 'transfers',
-      label: 'Internal Moves',
+      id: 'products',
+      label: 'Products & Stock',
+      icon: Package,
+      badge: products.length
+    },
+    {
+      id: 'operations',
+      label: 'Operations Hub',
       icon: ArrowLeftRight,
-      badge: scheduledTransfersCount,
-      targetView: 'operations',
-      onClick: () => {
-        setCurrentView('operations');
-        setMobileSidebarOpen?.(false);
-      }
+      badge: totalPendingOps > 0 ? totalPendingOps : null,
+      badgeColor: 'bg-primary text-white'
     },
     {
-      id: 'deliveries',
-      label: 'Delivery Orders',
-      icon: Truck,
-      badge: pendingDeliveriesCount,
-      targetView: 'operations',
-      onClick: () => {
-        setCurrentView('operations');
-        setMobileSidebarOpen?.(false);
-      }
+      id: 'ledger',
+      label: 'Stock Ledger',
+      icon: FileText,
+      badge: null
     },
     {
-      id: 'adjustments',
-      label: 'Scrap & Adjust',
-      icon: Trash2,
-      targetView: 'operations',
-      onClick: () => {
-        setCurrentView('operations');
-        setMobileSidebarOpen?.(false);
-      }
-    },
+      id: 'barcode',
+      label: 'Barcode Terminal',
+      icon: ScanLine,
+      badge: null
+    }
   ];
 
-  const topologyLinks = [
-    {
-      id: 'bins',
-      label: 'Bins & Locations',
-      icon: Grid3X3,
-      onClick: () => {
-        setCurrentView('warehouse');
-        setMobileSidebarOpen?.(false);
-      }
-    },
-    {
-      id: 'lots',
-      label: 'Lots & Serials',
-      icon: QrCode,
-      onClick: () => {
-        setCurrentView('products');
-        setMobileSidebarOpen?.(false);
-      }
-    },
-  ];
+  const handleNavClick = (viewId) => {
+    setCurrentView(viewId);
+    setMobileSidebarOpen?.(false);
+  };
 
   return (
     <>
@@ -105,122 +84,118 @@ export default function Sidebar({
         />
       )}
 
-      <aside className={`fixed left-0 top-[124px] bottom-0 w-60 bg-surface-container-low shadow-[4px_0_20px_rgba(0,0,0,0.3)] flex flex-col justify-between py-4 z-40 border-r border-surface-container transition-transform duration-200 ${
+      <aside className={`fixed left-0 top-16 bottom-0 w-60 bg-surface-container-low shadow-[4px_0_20px_rgba(0,0,0,0.3)] flex flex-col justify-between py-4 z-40 border-r border-surface-container transition-transform duration-200 ${
         mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       }`}>
-        <div className="flex flex-col gap-1 px-3 overflow-y-auto">
-          {/* Operations Scope Section */}
-          <div className="px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-secondary font-bold flex items-center justify-between">
-            <span>Operations Scope</span>
-            <span className="text-[10px] text-primary font-semibold">Active</span>
-          </div>
-
-          <nav className="flex flex-col gap-1">
-            {operationsLinks.map(link => {
-              const Icon = link.icon;
-              const isActive = currentView === link.targetView;
-              return (
-                <button
-                  key={link.id}
-                  onClick={link.onClick}
-                  className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                    isActive
-                      ? 'bg-primary-container text-on-primary font-semibold shadow-xs border border-primary/30'
-                      : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-                  }`}
-                >
-                  <span className="flex items-center gap-2.5">
-                    <Icon className="w-4 h-4" />
-                    <span>{link.label}</span>
-                  </span>
-                  {link.badge !== undefined && link.badge > 0 && (
-                    <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded font-bold ${
-                      isActive ? 'bg-primary text-white' : 'bg-surface-container-highest text-on-surface'
-                    }`}>
-                      {link.badge}
+        <div className="flex flex-col gap-6 px-3 overflow-y-auto">
+          {/* Main Navigation */}
+          <div>
+            <div className="px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-secondary font-bold mb-1">
+              Main Menu
+            </div>
+            <nav className="flex flex-col gap-1">
+              {mainNavItems.map(item => {
+                const Icon = item.icon;
+                const isActive = currentView === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => handleNavClick(item.id)}
+                    className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                      isActive
+                        ? 'bg-primary text-white shadow-purple-glow font-bold'
+                        : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <Icon className="w-4 h-4" />
+                      <span>{item.label}</span>
                     </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Warehouse Topology Section */}
-          <div className="mt-5 px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-secondary font-bold">
-            Warehouse Topology
+                    {item.badge !== null && item.badge !== undefined && (
+                      <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                        isActive
+                          ? 'bg-white/20 text-white'
+                          : item.badgeColor || 'bg-surface-container-highest text-secondary'
+                      }`}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
           </div>
 
-          <nav className="flex flex-col gap-1">
-            {topologyLinks.map(link => {
-              const Icon = link.icon;
-              const isActive = currentView === 'warehouse' && link.id === 'bins';
-              return (
-                <button
-                  key={link.id}
-                  onClick={link.onClick}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors ${
-                    isActive ? 'bg-primary-container text-on-primary font-semibold border border-primary/30' : ''
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{link.label}</span>
-                </button>
-              );
-            })}
-          </nav>
+          {/* Quick Actions (Manager & Staff Fast Triggers) */}
+          <div>
+            <div className="px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-secondary font-bold mb-1 flex items-center justify-between">
+              <span>Quick Actions</span>
+              <span className="text-primary text-[10px]">1-Click</span>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <button
+                onClick={() => {
+                  onOpenReceiptModal?.();
+                  setMobileSidebarOpen?.(false);
+                }}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs font-medium text-on-surface transition-colors border border-surface-container"
+              >
+                <ArrowDownLeft className="w-3.5 h-3.5 text-tertiary" />
+                <span>+ Inbound Receipt</span>
+              </button>
 
-          {/* Quick Action Shortcuts for Staff & Managers */}
-          <div className="mt-4 pt-3 border-t border-surface-container px-1 flex flex-col gap-1.5">
-            <span className="font-mono text-[10px] text-secondary uppercase font-semibold px-2">Quick Forms</span>
-            <button
-              onClick={() => {
-                onOpenReceiptModal();
-                setMobileSidebarOpen?.(false);
-              }}
-              className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-surface-container-lowest hover:bg-surface-container text-xs text-on-surface transition-colors border border-surface-container text-left shadow-2xs group"
-            >
-              <PlusCircle className="w-3.5 h-3.5 text-tertiary group-hover:scale-110 transition-transform" />
-              <span>+ Draft Receipt</span>
-            </button>
-            <button
-              onClick={() => {
-                onOpenTransferModal();
-                setMobileSidebarOpen?.(false);
-              }}
-              className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-surface-container-lowest hover:bg-surface-container text-xs text-on-surface transition-colors border border-surface-container text-left shadow-2xs group"
-            >
-              <MoveUpRight className="w-3.5 h-3.5 text-primary group-hover:scale-110 transition-transform" />
-              <span>+ Internal Move</span>
-            </button>
-            <button
-              onClick={() => {
-                onOpenAdjustmentModal();
-                setMobileSidebarOpen?.(false);
-              }}
-              className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-surface-container-lowest hover:bg-surface-container text-xs text-on-surface transition-colors border border-surface-container text-left shadow-2xs group"
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5 text-error group-hover:scale-110 transition-transform" />
-              <span>+ Cycle Count</span>
-            </button>
+              <button
+                onClick={() => {
+                  onOpenDeliveryModal?.();
+                  setMobileSidebarOpen?.(false);
+                }}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs font-medium text-on-surface transition-colors border border-surface-container"
+              >
+                <Truck className="w-3.5 h-3.5 text-primary-light" />
+                <span>- Delivery Order</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  onOpenTransferModal?.();
+                  setMobileSidebarOpen?.(false);
+                }}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs font-medium text-on-surface transition-colors border border-surface-container"
+              >
+                <ArrowLeftRight className="w-3.5 h-3.5 text-secondary" />
+                <span>⇄ Internal Transfer</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  onOpenAdjustmentModal?.();
+                  setMobileSidebarOpen?.(false);
+                }}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs font-medium text-on-surface transition-colors border border-surface-container"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 text-error" />
+                <span>± Stock Adjustment</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Main Store Capacity Meter */}
-        <div className="px-4 py-3 bg-surface-container-lowest mx-3 rounded-xl shadow-xs border border-surface-container">
-          <div className="flex items-center justify-between text-[11px] text-secondary mb-1">
-            <span className="font-medium flex items-center gap-1.5">
-              <HardDrive className="w-3.5 h-3.5 text-secondary" /> Main Store Cap
-            </span>
-            <span className="font-mono font-bold text-on-surface">82.4%</span>
-          </div>
-          <div className="w-full h-1.5 rounded-full bg-surface-container overflow-hidden">
-            <div className="w-[82.4%] h-full bg-gradient-to-r from-primary to-primary-light rounded-full transition-all duration-500"></div>
-          </div>
-          <div className="mt-2 flex items-center justify-between font-mono text-[10px] text-secondary">
-            <span>4,120 / 5,000 Pallets</span>
-            <span className="text-tertiary font-semibold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span> Active
-            </span>
+        {/* Bottom User Role Card */}
+        <div className="px-3 pt-3 border-t border-surface-container">
+          <div className="p-3 rounded-xl bg-surface-container flex items-center justify-between border border-surface-container">
+            <div className="flex flex-col">
+              <span className="font-mono text-[9px] uppercase tracking-wider text-secondary font-bold">Active Role</span>
+              <span className="text-xs font-bold text-on-surface capitalize">
+                {user.role === 'manager' ? 'Inventory Manager' : 'Warehouse Staff'}
+              </span>
+            </div>
+            <button
+              onClick={() => switchRole(user.role === 'manager' ? 'staff' : 'manager')}
+              className="px-2 py-1 rounded-md bg-primary-container/30 hover:bg-primary-container/50 text-primary-light text-[10px] font-bold border border-primary/30 transition-colors"
+              title="Switch Role"
+            >
+              Switch
+            </button>
           </div>
         </div>
       </aside>

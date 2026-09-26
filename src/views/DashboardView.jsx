@@ -1,21 +1,19 @@
 import React from 'react';
-import ScenarioBanner from '../components/ScenarioBanner';
 import KpiCards from '../components/KpiCards';
-import FlowMap from '../components/FlowMap';
 import OperationsTable from '../components/OperationsTable';
-import RightColumnIntelligence from '../components/RightColumnIntelligence';
 import { useInventory } from '../context/InventoryContext';
 import {
-  Layers,
-  Warehouse,
-  Cpu,
-  Truck,
-  Trash2,
   Plus,
   ArrowDownLeft,
+  Truck,
   ArrowLeftRight,
   SlidersHorizontal,
-  Zap
+  Zap,
+  Warehouse,
+  AlertTriangle,
+  Package,
+  Layers,
+  CheckCircle2
 } from 'lucide-react';
 
 export default function DashboardView({
@@ -29,41 +27,32 @@ export default function DashboardView({
 }) {
   const {
     products,
-    isLiveStreamActive,
-    setIsLiveStreamActive,
-    simulateLiveEvent,
-    triggerToast
+    generateDraftPO,
+    setCurrentView
   } = useInventory();
 
   // Multi-location breakdown counts
   const wh1StoreTotal = products.reduce((acc, p) => acc + ((p.locations && p.locations['wh1-store']) || 0), 0);
   const wh2ProdTotal = products.reduce((acc, p) => acc + ((p.locations && p.locations['wh2-prod']) || 0), 0);
-  const stagingTotal = products.reduce((acc, p) => acc + ((p.locations && p.locations['wh1-staging']) || 0), 0);
-  const scrapTotal = products.reduce((acc, p) => acc + ((p.locations && p.locations['virtual-scrap']) || 0), 3);
+
+  // Critical low-stock items
+  const lowStockProducts = products.filter(p => p.totalStock <= p.minStock);
 
   return (
     <div className="flex flex-col w-full gap-6">
-      {/* 1. Official Odoo Scenario Walkthrough Banner */}
-      <ScenarioBanner
-        onOpenReceiptModal={onOpenReceiptModal}
-        onOpenTransferModal={onOpenTransferModal}
-        onOpenAdjustmentModal={onOpenAdjustmentModal}
-      />
-
-      {/* 2. Top 5 Executive KPI Metric Cards with Animated Counter */}
+      {/* 1. Executive KPI Cards */}
       <KpiCards />
 
-      {/* 2.5 Manager Quick Action & Real-World Live Suite */}
-      <div className="p-4 rounded-2xl bg-surface-container-lowest border border-surface-container shadow-card-depth flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-        {/* Left: Quick Inflow & Outflow Action Buttons */}
+      {/* 2. Manager Fast-Action Operations Toolbar */}
+      <div className="p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-card-depth flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs font-bold text-on-surface uppercase tracking-wider font-mono mr-1 hidden sm:inline">
-            Manager Actions:
+            Fast Actions:
           </span>
 
           <button
             onClick={onOpenNewProductModal}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover transition-all shadow-purple-glow active:scale-95"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-hover transition-all shadow-purple-glow active:scale-95"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>+ Add Product</span>
@@ -71,100 +60,50 @@ export default function DashboardView({
 
           <button
             onClick={onOpenReceiptModal}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-tertiary-container/30 text-tertiary border border-tertiary/30 text-xs font-bold hover:bg-tertiary/20 transition-all active:scale-95"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-tertiary-container/30 text-tertiary border border-tertiary/30 text-xs font-bold hover:bg-tertiary/20 transition-all active:scale-95"
           >
             <ArrowDownLeft className="w-3.5 h-3.5" />
-            <span>+ Inbound PO</span>
+            <span>+ Inbound Receipt</span>
           </button>
 
           <button
             onClick={onOpenDeliveryModal}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface border border-surface-container text-xs font-bold transition-all active:scale-95"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface border border-surface-container text-xs font-bold transition-all active:scale-95"
           >
             <Truck className="w-3.5 h-3.5 text-primary-light" />
-            <span>- Dispatch</span>
+            <span>- Delivery Order</span>
           </button>
 
           <button
             onClick={onOpenTransferModal}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface border border-surface-container text-xs font-semibold transition-all active:scale-95"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface border border-surface-container text-xs font-semibold transition-all active:scale-95"
           >
             <ArrowLeftRight className="w-3.5 h-3.5 text-secondary" />
-            <span>⇄ Transfer</span>
+            <span>⇄ Internal Transfer</span>
           </button>
 
           <button
             onClick={onOpenAdjustmentModal}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface border border-surface-container text-xs font-semibold transition-all active:scale-95"
+            className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface border border-surface-container text-xs font-semibold transition-all active:scale-95"
           >
             <SlidersHorizontal className="w-3.5 h-3.5 text-error" />
-            <span>± Audit</span>
-          </button>
-
-          <button
-            onClick={() => onOpenQuickRestockModal()}
-            className="flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-bold hover:bg-emerald-500/25 transition-all active:scale-95"
-          >
-            <Zap className="w-3.5 h-3.5" />
-            <span>1-Click Restock</span>
+            <span>± Stock Adjustment</span>
           </button>
         </div>
 
-        {/* Right: Live Stream Real-Time Simulator */}
-        <div className="flex items-center gap-2 pt-2 xl:pt-0 border-t xl:border-t-0 border-surface-container flex-wrap">
-          {/* 1-Click Live Event Triggers */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => simulateLiveEvent('order')}
-              className="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-mono text-[11px] font-semibold border border-surface-container transition-all active:scale-95"
-              title="Simulate immediate customer sales order"
-            >
-              ⚡ Live Order
-            </button>
-            <button
-              onClick={() => simulateLiveEvent('receipt')}
-              className="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-mono text-[11px] font-semibold border border-surface-container transition-all active:scale-95"
-              title="Simulate immediate vendor delivery"
-            >
-              ⚡ Live Supply
-            </button>
-          </div>
-
-          <div className="h-5 w-px bg-outline/20 hidden sm:block"></div>
-
-          {/* Real-time background feed toggle */}
-          <button
-            onClick={() => {
-              const next = !isLiveStreamActive;
-              setIsLiveStreamActive(next);
-              triggerToast(
-                next 
-                  ? '🟢 Live Stream Activated: Real-world customer orders & supply inflows will process in real-time!' 
-                  : '⏸️ Live Stream Paused'
-              );
-            }}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-              isLiveStreamActive
-                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
-                : 'bg-surface-container text-secondary border-surface-container hover:text-on-surface'
-            }`}
-          >
-            <span className={`w-2 h-2 rounded-full ${isLiveStreamActive ? 'bg-emerald-400 animate-ping' : 'bg-secondary'}`}></span>
-            <span className="font-mono text-[11px]">
-              {isLiveStreamActive ? 'LIVE FEED: ON' : 'LIVE FEED: OFF'}
-            </span>
-          </button>
-        </div>
+        <button
+          onClick={() => onOpenQuickRestockModal()}
+          className="flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-bold hover:bg-emerald-500/25 transition-all active:scale-95 shrink-0"
+        >
+          <Zap className="w-3.5 h-3.5" />
+          <span>1-Click Restock</span>
+        </button>
       </div>
 
-      {/* 3. Main Split Layout (68% Left | 32% Right) */}
+      {/* 3. Main Operational Content Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column (lg:col-span-8) */}
-        <div className="lg:col-span-8 flex flex-col gap-6 min-w-0">
-          {/* Innovation 4.2: Odoo Double-Entry Visual Flow Map */}
-          <FlowMap />
-
-          {/* Operations Hub & Live Stock Moves Table */}
+        {/* Left: Operations Hub Table (lg:col-span-8) */}
+        <div className="lg:col-span-8 flex flex-col gap-6">
           <OperationsTable
             onOpenSlipModal={onOpenSlipModal}
             onOpenReceiptModal={onOpenReceiptModal}
@@ -172,68 +111,113 @@ export default function DashboardView({
             onOpenTransferModal={onOpenTransferModal}
             onOpenAdjustmentModal={onOpenAdjustmentModal}
           />
-
-          {/* Multi-Location Breakdown Quick Matrix */}
-          <section className="p-4 rounded-xl bg-surface-container-lowest shadow-card-depth flex flex-col gap-3 border border-surface-container">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-1 rounded-lg bg-surface-container text-secondary">
-                  <Layers className="w-4 h-4 text-primary-light" />
-                </div>
-                <h4 className="font-headline text-sm font-bold text-on-surface">
-                  Multi-Location Physical Matrix
-                </h4>
-              </div>
-              <span className="font-mono text-xs text-secondary">4 Managed Physical &amp; Virtual Nodes</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-              <div className="p-3 rounded-xl bg-surface-container-low flex flex-col border border-surface-container">
-                <span className="font-mono text-[10px] text-secondary font-bold uppercase flex items-center gap-1">
-                  <Warehouse className="w-3 h-3 text-primary-light" /> WH1: Main Store
-                </span>
-                <span className="font-mono text-base font-bold text-on-surface mt-1.5">
-                  {wh1StoreTotal.toLocaleString()} Units
-                </span>
-                <span className="font-mono text-[11px] text-tertiary font-semibold mt-0.5">Rack A / Rack B</span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-surface-container-low flex flex-col border border-surface-container">
-                <span className="font-mono text-[10px] text-secondary font-bold uppercase flex items-center gap-1">
-                  <Cpu className="w-3 h-3 text-secondary" /> WH2: Production
-                </span>
-                <span className="font-mono text-base font-bold text-on-surface mt-1.5">
-                  {wh2ProdTotal.toLocaleString()} Units
-                </span>
-                <span className="font-mono text-[11px] text-secondary font-semibold mt-0.5">Silo &amp; Active Racks</span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-surface-container-low flex flex-col border border-surface-container">
-                <span className="font-mono text-[10px] text-secondary font-bold uppercase flex items-center gap-1">
-                  <Truck className="w-3 h-3 text-primary-light" /> Staging Area
-                </span>
-                <span className="font-mono text-base font-bold text-on-surface mt-1.5">
-                  {stagingTotal.toLocaleString()} Units
-                </span>
-                <span className="font-mono text-[11px] text-primary-light font-semibold mt-0.5">Bay A03 Ready</span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-error-container/15 flex flex-col border border-error-container/30">
-                <span className="font-mono text-[10px] text-error font-bold uppercase flex items-center gap-1">
-                  <Trash2 className="w-3 h-3 text-error" /> Virtual Scrap
-                </span>
-                <span className="font-mono text-base font-bold text-error mt-1.5">
-                  {scrapTotal.toLocaleString()} Units
-                </span>
-                <span className="font-mono text-[11px] text-error font-semibold mt-0.5">Audit Disposed</span>
-              </div>
-            </div>
-          </section>
         </div>
 
-        {/* Right Column (lg:col-span-4) - Winning Innovations & AI Center */}
-        <div className="lg:col-span-4">
-          <RightColumnIntelligence />
+        {/* Right: Low Stock Watchlist & Warehouse Balance (lg:col-span-4) */}
+        <div className="lg:col-span-4 flex flex-col gap-5">
+          {/* Low Stock Watchlist */}
+          <section className="p-4 rounded-xl bg-surface-container-lowest shadow-card-depth flex flex-col gap-3 border border-surface-container">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <div className="p-1 rounded-lg bg-error-container/20 text-error border border-error/20">
+                  <AlertTriangle className="w-4 h-4" />
+                </div>
+                <h3 className="font-headline text-sm font-bold text-on-surface">Low Stock Watchlist</h3>
+              </div>
+              <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-error-container/30 text-error font-bold border border-error/30">
+                {lowStockProducts.length} Items Critical
+              </span>
+            </div>
+
+            {lowStockProducts.length === 0 ? (
+              <div className="p-4 rounded-lg bg-surface-container-low text-center flex flex-col items-center justify-center gap-1.5 text-secondary border border-surface-container">
+                <CheckCircle2 className="w-6 h-6 text-tertiary" />
+                <span className="text-xs font-medium text-on-surface">All items above reorder thresholds</span>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {lowStockProducts.map(p => (
+                  <div
+                    key={p.sku}
+                    className="p-3 rounded-lg bg-surface-container-low flex flex-col gap-2 border border-surface-container hover:border-error/40 transition-colors"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-on-surface">{p.name}</span>
+                        <span className="font-mono text-[10px] text-primary-light font-semibold">{p.sku}</span>
+                      </div>
+                      <span className="font-mono text-xs font-bold text-error bg-error-container/20 px-2 py-0.5 rounded border border-error/30">
+                        {p.totalStock} / {p.minStock} {p.uom}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1 border-t border-surface-container">
+                      <span className="text-[10px] text-secondary">
+                        Supplier: {p.supplier}
+                      </span>
+                      <button
+                        onClick={() => onOpenQuickRestockModal(p.sku)}
+                        className="px-2.5 py-1 rounded bg-primary text-white text-[11px] font-bold hover:bg-primary-hover transition-colors shadow-2xs flex items-center gap-1"
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>Restock</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button
+              onClick={() => setCurrentView('products')}
+              className="w-full py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-secondary hover:text-on-surface text-center transition-colors border border-surface-container"
+            >
+              View Full Catalog ({products.length} SKUs) →
+            </button>
+          </section>
+
+          {/* Warehouse Storage Distribution */}
+          <section className="p-4 rounded-xl bg-surface-container-lowest shadow-card-depth flex flex-col gap-3 border border-surface-container">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <div className="p-1 rounded-lg bg-primary-container/20 text-primary border border-primary/20">
+                  <Warehouse className="w-4 h-4" />
+                </div>
+                <h3 className="font-headline text-sm font-bold text-on-surface">Warehouse Balances</h3>
+              </div>
+              <span className="font-mono text-[10px] text-secondary">2 Locations</span>
+            </div>
+
+            <div className="flex flex-col gap-2.5">
+              <div className="p-3 rounded-lg bg-surface-container-low flex items-center justify-between border border-surface-container">
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-on-surface">WH1: Central Store</span>
+                  <span className="text-[10px] text-secondary">Rack A / Rack B Main Storage</span>
+                </div>
+                <span className="font-mono text-base font-bold text-primary-light">
+                  {wh1StoreTotal.toLocaleString()} Units
+                </span>
+              </div>
+
+              <div className="p-3 rounded-lg bg-surface-container-low flex items-center justify-between border border-surface-container">
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-on-surface">WH2: Manufacturing Plant</span>
+                  <span className="text-[10px] text-secondary">Production Floor Silo</span>
+                </div>
+                <span className="font-mono text-base font-bold text-tertiary">
+                  {wh2ProdTotal.toLocaleString()} Units
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={onOpenTransferModal}
+              className="w-full py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface flex items-center justify-center gap-1.5 transition-colors border border-surface-container"
+            >
+              <ArrowLeftRight className="w-3.5 h-3.5 text-secondary" />
+              <span>Transfer Between Warehouses</span>
+            </button>
+          </section>
         </div>
       </div>
     </div>
