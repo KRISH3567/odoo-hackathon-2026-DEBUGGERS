@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #a855f7;
+  --color-primary-hover: #9333ea;
+  --color-primary-container: #7e22ce;
+  --color-primary-light: #c084fc;
+  --color-primary-dim: #581c87;
+
+  --color-navy-base: #080c14;
+  --color-navy-card: #0f172a;
+  --color-navy-elevated: #15203b;
+  --color-navy-border: #1e293b;
+  --color-navy-border-hover: #334155;
+
+  --color-surface: #0b0f19;
+  --color-surface-container: #111827;
+  --color-surface-container-high: #172033;
+  --color-surface-container-highest: #1f2b44;
+  --color-surface-container-low: #0d1320;
+  --color-surface-container-lowest: #080c14;
+
+  --color-on-surface: #f8fafc;
+  --color-on-surface-variant: #94a3b8;
+  --color-secondary: #64748b;
+  --color-secondary-container: #1e293b;
+  --color-outline: #334155;
+
+  --color-tertiary: #10b981;
+  --color-tertiary-container: #064e3b;
+  --color-tertiary-fixed: #6ee7b7;
+
+  --color-error: #f43f5e;
+  --color-error-container: #881337;
+
+  --font-headline: "Geist", system-ui, -apple-system, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-body);
+    background-color: #080c14;
+    color: #f8fafc;
+    color-scheme: dark;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0b0f19;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a855f7;
+}
+
+/* Scanner Beam Animation */
+@keyframes scanBeam {
+  0% { top: 8%; opacity: 0.9; }
+  50% { top: 92%; opacity: 1; }
+  100% { top: 8%; opacity: 0.9; }
+}
+
+.animate-scan-beam {
+  animation: scanBeam 2s infinite ease-in-out;
+}
+
+/* Soft Glow & Depth Utilities */
+.shadow-purple-glow {
+  box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.25);
+}
+
+.shadow-card-depth {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.shadow-card-hover {
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.7), 0 0 15px -2px rgba(168, 85, 247, 0.2), 0 0 0 1px rgba(168, 85, 247, 0.3);
+}
+
+/* Print Stylesheet for Single-Page Clean Invoices & Reports */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    color-scheme: light !important;
+  }
+
+  header, aside, nav, button, #toast-container {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
