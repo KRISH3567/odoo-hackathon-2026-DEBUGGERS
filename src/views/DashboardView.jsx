@@ -35,6 +35,8 @@ export default function DashboardView({
 
   const [activityTab, setActivityTab] = useState('all'); // 'all' | 'receipt' | 'delivery' | 'transfer'
 
+  const [searchTerm] = useState(''); // activity search (reserved)
+
   // Critical low-stock items
   const lowStockProducts = products.filter(p => p.totalStock <= p.minStock);
 
@@ -50,12 +52,12 @@ export default function DashboardView({
     .filter(op => {
       const matchTab = activityTab === 'all' || op.type === activityTab;
       const matchSearch = searchTerm === '' ||
-        op.ref.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        op.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        op.partner.toLowerCase().includes(searchTerm.toLowerCase());
+        (op.ref || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (op.productName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (op.partner || '').toLowerCase().includes(searchTerm.toLowerCase());
       return matchTab && matchSearch;
     })
-    .slice(0, 7); // Show top 7 for a clean, digestible view
+    .slice(0, 7);
 
   const handleQuickValidate = (op) => {
     if (op.type === 'receipt') {
