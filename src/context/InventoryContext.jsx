@@ -69,7 +69,6 @@ export function InventoryProvider({ children }) {
   // Interactive Scenario State
   const [scenarioRunning, setScenarioRunning] = useState(false);
   const [scenarioStep, setScenarioStep] = useState(0); // 0 = idle, 1, 2, 3, 4
-  const [scenarioLogs, setScenarioLogs] = useState([]);
 
   // Toast System
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -484,7 +483,6 @@ export function InventoryProvider({ children }) {
     if (scenarioRunning) return;
     setScenarioRunning(true);
     setScenarioStep(0);
-    setScenarioLogs([]);
     triggerToast('Starting Official Odoo 4-Step Scenario Walkthrough (15s)...');
 
     // Step 1: Tata Steel Receipt +100 kg

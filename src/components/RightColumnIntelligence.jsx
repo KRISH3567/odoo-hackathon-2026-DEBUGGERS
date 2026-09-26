@@ -3,7 +3,6 @@ import { useInventory } from '../context/InventoryContext';
 
 export default function RightColumnIntelligence() {
   const {
-    products,
     generateDraftPO,
     simulateBarcodeScan,
     triggerToast
@@ -25,7 +24,7 @@ export default function RightColumnIntelligence() {
   const currentMouseStock = 8;
   const daysLeft = Math.max(0.4, (currentMouseStock / baseDemand)).toFixed(1);
 
-  const handleScanPreset = (code, desc) => {
+  const handleScanPreset = (code) => {
     setIsLaserSuccess(true);
     setScannerStatus(`Scanned [${code}] • Verified!`);
     simulateBarcodeScan(code);

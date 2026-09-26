@@ -7,8 +7,7 @@ export default function Sidebar({ onOpenReceiptModal, onOpenTransferModal, onOpe
     setCurrentView,
     pendingReceiptsCount,
     pendingDeliveriesCount,
-    scheduledTransfersCount,
-    user
+    scheduledTransfersCount
   } = useInventory();
 
   const operationsLinks = [

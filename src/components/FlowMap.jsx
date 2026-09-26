@@ -2,7 +2,7 @@ import React from 'react';
 import { useInventory } from '../context/InventoryContext';
 
 export default function FlowMap() {
-  const { products, operations } = useInventory();
+  const { products } = useInventory();
 
   // Calculate live quantities for Steel Rods (the primary Odoo scenario product)
   const steelProd = products.find(p => p.sku === 'RAW-STL-001') || {

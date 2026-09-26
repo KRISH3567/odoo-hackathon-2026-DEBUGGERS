@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
 
 export default function BarcodeView() {
-  const { products, operations, simulateBarcodeScan, triggerToast } = useInventory();
+  const { simulateBarcodeScan } = useInventory();
 
   const [inputVal, setInputVal] = useState('');
   const [scanHistory, setScanHistory] = useState([
